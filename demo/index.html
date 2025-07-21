@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANS Registry - Live Demo v0.1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .hero {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .resolver-input {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .agent-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+        
+        .agent-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .resolve-btn {
+            padding: 1rem 2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .resolve-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .resolve-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .quick-examples {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        
+        .example-btn {
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            transition: all 0.2s;
+        }
+        
+        .example-btn:hover {
+            background: #e5e7eb;
+            border-color: #667eea;
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .result.error {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+        
+        .result pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+            color: #f0f9ff;
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .links a {
+            display: inline-block;
+            margin: 0 1rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .links a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="status-badge">🚀 Live Demo v0.1</div>
+            <h1>ANS Registry</h1>
+            <p>Universal naming for AI agents • Resolve <code>agent://</code> URIs like DNS for the web</p>
+        </div>
+        
+        <div class="demo-card">
+            <h2>🔍 Live Agent Resolution</h2>
+            <p>Try resolving these agent URIs to see the ANS protocol in action:</p>
+            
+            <div class="quick-examples">
+                <button class="example-btn" onclick="setExample('agent://hello.dev.pbolduc')">agent://hello.dev.pbolduc</button>
+                <button class="example-btn" onclick="setExample('agent://support.demo.ansregistry')">agent://support.demo.ansregistry</button>
+                <button class="example-btn" onclick="setExample('agent://hr.internal.company.local')">agent://hr.internal.company.local</button>
+                <button class="example-btn" onclick="setExample('agent://it-support.internal.company.local')">agent://it-support.internal.company.local</button>
+                <button class="example-btn" onclick="setExample('agent://test.local')">agent://test.local</button>
+            </div>
+            
+            <div class="resolver-input">
+                <input 
+                    type="text" 
+                    class="agent-input" 
+                    id="agentUri" 
+                    placeholder="Enter agent:// URI..."
+                    value="agent://hello.dev.pbolduc"
+                >
+                <button class="resolve-btn" onclick="resolveAgent()" id="resolveBtn">
+                    🔍 Resolve
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <p>🔄 Resolving agent...</p>
+            </div>
+            
+            <div id="result"></div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>🌐 Universal Naming</h3>
+                <p>Memorable, hierarchical names for AI agents across platforms. Just like DNS for websites.</p>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ Fast Resolution</h3>
+                <p>Sub-100ms resolution times with intelligent caching and fallback mechanisms.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Secure & Verified</h3>
+                <p>Cryptographic verification through DNS, HTTPS, and JWS signatures.</p>
+            </div>
+        </div>
+        
+        <div class="links">
+            <a href="https://github.com/ANSRegistry/core" target="_blank">📚 GitHub</a>
+            <a href="https://ansregistry.org" target="_blank">🌐 Registry</a>
+            <a href="mailto:philippe@ansregistry.org">✉️ Contact</a>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced demo registry with internal agents
+        const DEMO_REGISTRY = {
+            'agent://hello.dev.pbolduc': {
+                agent_uri: 'agent://hello.dev.pbolduc',
+                endpoint: 'https://api.ansregistry.org/demo/hello',
+                status: 'active',
+                capabilities: ['chat', 'demo', 'greeting'],
+                metadata: {
+                    version: '0.1.0',
+                    organization: 'ANS Registry',
+                    description: 'Demo greeting agent for ANS protocol showcase',
+                    contact: 'philippe@ansregistry.org',
+                    created: new Date().toISOString(),
+                    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                resolution: {
+                    ttl: 300,
+                    cached: false,
+                    resolver: 'ansregistry.org',
+                    resolved_at: new Date().toISOString()
+                }
+            },
+            'agent://support.demo.ansregistry': {
+                agent_uri: 'agent://support.demo.ansregistry',
+                endpoint: 'https://api.ansregistry.org/demo/support',
+                status: 'active',
+                capabilities: ['support', 'faq', 'documentation', 'troubleshooting'],
+                metadata: {
+                    version: '1.0.0',
+                    organization: 'ANS Registry',
+                    description: 'Customer support agent for ANS Registry services',
+                    contact: 'support@ansregistry.org',
+                    created: new Date().toISOString(),
+                    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                resolution: {
+                    ttl: 300,
+                    cached: false,
+                    resolver: 'ansregistry.org',
+                    resolved_at: new Date().toISOString()
+                }
+            },
+            'agent://test.local': {
+                agent_uri: 'agent://test.local',
+                endpoint: 'https://localhost:3000/agent',
+                status: 'active',
+                capabilities: ['test', 'development'],
+                metadata: {
+                    version: '0.1.0',
+                    description: 'Local development test agent',
+                    created: new Date().toISOString()
+                },
+                resolution: {
+                    ttl: 60,
+                    cached: false,
+                    resolver: 'local',
+                    resolved_at: new Date().toISOString()
+                }
+            },
+            // Internal agents
+            'agent://hr.internal.company.local': {
+                agent_uri: 'agent://hr.internal.company.local',
+                endpoint: 'https://hr-system.company.local:8080/agent',
+                status: 'active',
+                capabilities: ['hr', 'benefits', 'payroll', 'internal'],
+                metadata: {
+                    version: '1.0.0',
+                    organization: 'Company Corp',
+                    description: 'Internal HR agent for employee services',
+                    contact: 'hr@company.local',
+                    created: new Date().toISOString()
+                },
+                resolution: {
+                    ttl: 3600,
+                    cached: false,
+                    resolver: 'internal-config',
+                    resolved_at: new Date().toISOString()
+                }
+            },
+            'agent://it-support.internal.company.local': {
+                agent_uri: 'agent://it-support.internal.company.local',
+                endpoint: 'https://helpdesk.company.local/agent',
+                status: 'active',
+                capabilities: ['it', 'support', 'troubleshooting', 'internal'],
+                metadata: {
+                    version: '1.0.0',
+                    organization: 'Company Corp IT',
+                    description: 'Internal IT support agent',
+                    contact: 'it-support@company.local',
+                    created: new Date().toISOString()
+                },
+                resolution: {
+                    ttl: 3600,
+                    cached: false,
+                    resolver: 'internal-config',
+                    resolved_at: new Date().toISOString()
+                }
+            }
+        };
+
+        function validateAgentURI(uri) {
+            const pattern = /^agent:\/\/([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})?$/;
+            return pattern.test(uri) && uri.length <= 253;
+        }
+
+        async function resolve(uri) {
+            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+            
+            if (!validateAgentURI(uri)) {
+                return {
+                    error: 'Invalid URI format',
+                    code: 400,
+                    message: 'Agent URI must follow format: agent://[agent-name].[service].[organization].[tld]',
+                    agent_uri: uri
+                };
+            }
+
+            if (DEMO_REGISTRY[uri]) {
+                return {
+                    ...DEMO_REGISTRY[uri],
+                    resolution: {
+                        ...DEMO_REGISTRY[uri].resolution,
+                        resolved_at: new Date().toISOString()
+                    }
+                };
+            }
+
+            return {
+                error: 'Agent not found',
+                code: 404,
+                message: `Agent ${uri} is not registered or not resolvable`,
+                agent_uri: uri
+            };
+        }
+
+        function setExample(uri) {
+            document.getElementById('agentUri').value = uri;
+        }
+
+        async function resolveAgent() {
+            const uri = document.getElementById('agentUri').value.trim();
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const btn = document.getElementById('resolveBtn');
+            
+            if (!uri) {
+                showResult({
+                    error: 'Empty URI',
+                    code: 400,
+                    message: 'Please enter an agent URI',
+                    agent_uri: ''
+                });
+                return;
+            }
+            
+            // Show loading
+            loadingDiv.style.display = 'block';
+            resultDiv.innerHTML = '';
+            btn.disabled = true;
+            
+            try {
+                const result = await resolve(uri);
+                showResult(result);
+            } catch (error) {
+                showResult({
+                    error: 'Resolution failed',
+                    code: 500,
+                    message: error.message,
+                    agent_uri: uri
+                });
+            } finally {
+                loadingDiv.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        function showResult(result) {
+            const resultDiv = document.getElementById('result');
+            const isError = 'error' in result;
+            
+            resultDiv.className = `result ${isError ? 'error' : ''}`;
+            resultDiv.innerHTML = `
+                <h3>${isError ? '❌ Resolution Failed' : '✅ Agent Found'}</h3>
+                ${isError ? 
+                    `<p><strong>Error:</strong> ${result.message} (Code: ${result.code})</p>` : 
+                    `<p><strong>Endpoint:</strong> <code>${result.endpoint}</code></p>
+                     <p><strong>Status:</strong> <span style="color: #10b981;">${result.status}</span></p>
+                     ${result.metadata?.description ? `<p><strong>Description:</strong> ${result.metadata.description}</p>` : ''}
+                     ${result.capabilities ? `<p><strong>Capabilities:</strong> ${result.capabilities.join(', ')}</p>` : ''}`
+                }
+                <details>
+                    <summary>📋 Full JSON Response</summary>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </details>
+            `;
+        }
+
+        // Allow Enter key to resolve
+        document.getElementById('agentUri').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                resolveAgent();
+            }
+        });
+        
+        // Auto-resolve the default example on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                resolveAgent();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

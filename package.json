@@ -1,0 +1,63 @@
+{
+  "name": "@ansregistry/core",
+  "version": "0.1.0",
+  "description": "Universal naming for AI agents. Resolve agent:// URIs like DNS for the web.",
+  "main": "dist/resolve.js",
+  "types": "dist/resolve.d.ts",
+  "bin": {
+    "ans": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx test.ts",
+    "dev": "tsx --watch resolve.ts",
+    "demo": "serve demo.html",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build",
+    "deploy": "npm run test && npm run build && npm publish",
+    "deploy-demo": "cp demo.html dist/ && vercel --prod"
+  },
+  "keywords": [
+    "agent",
+    "ai",
+    "naming",
+    "resolution",
+    "uri",
+    "ans",
+    "registry",
+    "dns"
+  ],
+  "author": "Philippe Bolduc <philippe@ansregistry.org>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ANSRegistry/core.git"
+  },
+  "homepage": "https://ansregistry.org",
+  "bugs": {
+    "url": "https://github.com/ANSRegistry/core/issues"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.3",
+    "serve": "^14.2.3",
+    "vercel": "^32.2.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/pbolduc"
+  }
+}

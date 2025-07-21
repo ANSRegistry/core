@@ -1,0 +1,40 @@
+{
+    "owner": "ansregistry.org",
+    "agents": [
+      {
+        "agent_uri": "agent://hello.dev.pbolduc",
+        "endpoint": "https://api.ansregistry.org/demo/hello",
+        "capabilities": ["chat", "demo", "greeting"],
+        "version": "0.1.0",
+        "type": "persistent",
+        "created": "2025-07-21T10:00:00Z",
+        "updated": "2025-07-21T15:30:00Z",
+        "metadata": {
+          "description": "Demo greeting agent for ANS protocol showcase",
+          "documentation": "https://docs.ansregistry.org/agents/hello",
+          "contact": "philippe@ansregistry.org",
+          "tags": ["demo", "greeting", "v0.1"]
+        }
+      },
+      {
+        "agent_uri": "agent://support.demo.ansregistry",
+        "endpoint": "https://api.ansregistry.org/demo/support",
+        "capabilities": ["support", "faq", "documentation"],
+        "version": "1.0.0",
+        "type": "persistent",
+        "created": "2025-07-21T10:00:00Z",
+        "updated": "2025-07-21T15:30:00Z",
+        "metadata": {
+          "description": "Customer support agent for ANS Registry services",
+          "contact": "support@ansregistry.org",
+          "tags": ["customer-service", "support"]
+        }
+      }
+    ],
+    "metadata": {
+      "published_by": "ansregistry.org",
+      "format_version": "0.1.0",
+      "last_updated": "2025-07-21T15:30:00Z",
+      "cache_ttl": 300
+    }
+  }
