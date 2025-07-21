@@ -1,63 +1,84 @@
 {
   "name": "@ansregistry/core",
   "version": "0.1.0",
-  "description": "Universal naming for AI agents. Resolve agent:// URIs like DNS for the web.",
-  "main": "dist/resolve.js",
-  "types": "dist/resolve.d.ts",
-  "bin": {
-    "ans": "dist/cli.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "test": "tsx test.ts",
-    "dev": "tsx --watch resolve.ts",
-    "demo": "serve demo.html",
-    "clean": "rm -rf dist",
-    "prepack": "npm run clean && npm run build",
-    "deploy": "npm run test && npm run build && npm publish",
-    "deploy-demo": "cp demo.html dist/ && vercel --prod"
-  },
+  "description": "Universal naming for AI agents. Resolve agent:// URIs to service endpoints.",
   "keywords": [
-    "agent",
-    "ai",
-    "naming",
-    "resolution",
-    "uri",
-    "ans",
-    "registry",
-    "dns"
+    "ai-agents",
+    "naming-system", 
+    "agent-discovery",
+    "dns-like",
+    "typescript",
+    "resolver",
+    "agent-registry"
   ],
-  "author": "Philippe Bolduc <philippe@ansregistry.org>",
-  "license": "MIT",
+  "homepage": "https://ansregistry.org",
   "repository": {
     "type": "git",
     "url": "https://github.com/ANSRegistry/core.git"
   },
-  "homepage": "https://ansregistry.org",
   "bugs": {
     "url": "https://github.com/ANSRegistry/core/issues"
   },
+  "author": {
+    "name": "Philippe Bolduc",
+    "email": "philippe@ansregistry.org",
+    "url": "https://ansregistry.org"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
-    "dist/**/*",
+    "dist/",
     "README.md",
     "LICENSE"
   ],
-  "devDependencies": {
-    "@types/node": "^20.14.10",
-    "tsx": "^4.16.0",
-    "typescript": "^5.5.3",
-    "serve": "^14.2.3",
-    "vercel": "^32.2.0"
+  "scripts": {
+    "build": "tsc",
+    "build:clean": "rm -rf dist && npm run build",
+    "build:watch": "tsc --watch",
+    "test": "tsx test/resolve.test.ts",
+    "test:watch": "tsx --watch test/resolve.test.ts", 
+    "test:coverage": "c8 tsx test/resolve.test.ts",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "format": "prettier --write src/ test/",
+    "format:check": "prettier --check src/ test/",
+    "typecheck": "tsc --noEmit",
+    "demo": "serve demo --open",
+    "demo:dev": "serve demo --cors",
+    "prepublishOnly": "npm run build && npm run test && npm run lint",
+    "prepack": "npm run build",
+    "semantic-release": "semantic-release"
   },
   "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "serve": "^14.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0", 
+    "prettier": "^3.0.0",
+    "c8": "^8.0.0",
+    "semantic-release": "^22.0.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "funding": {
     "type": "individual",
-    "url": "https://github.com/sponsors/pbolduc"
+    "url": "https://github.com/sponsors/ANSRegistry"
   }
 }
