@@ -1,84 +1,95 @@
 {
-  "name": "@ansregistry/core",
+  "name": "@ansregistry/platform",
   "version": "0.1.0",
-  "description": "Universal naming for AI agents. Resolve agent:// URIs to service endpoints.",
-  "keywords": [
-    "ai-agents",
-    "naming-system", 
-    "agent-discovery",
-    "dns-like",
-    "typescript",
-    "resolver",
-    "agent-registry"
-  ],
+  "description": "Universal naming system for AI agents - Complete platform",
+  "private": true,
+  "type": "module",
+  "author": "Philippe Bolduc <philippe@ansregistry.org>",
+  "license": "MIT",
   "homepage": "https://ansregistry.org",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ANSRegistry/core.git"
+    "url": "git+https://github.com/ANSRegistry/core.git"
   },
   "bugs": {
     "url": "https://github.com/ANSRegistry/core/issues"
   },
-  "author": {
-    "name": "Philippe Bolduc",
-    "email": "philippe@ansregistry.org",
-    "url": "https://ansregistry.org"
-  },
-  "license": "MIT",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "files": [
-    "dist/",
-    "README.md",
-    "LICENSE"
+  "keywords": [
+    "ai",
+    "agents",
+    "registry",
+    "dns",
+    "resolution",
+    "discovery"
+  ],
+  "workspaces": [
+    "packages/*"
   ],
   "scripts": {
-    "build": "tsc",
-    "build:clean": "rm -rf dist && npm run build",
-    "build:watch": "tsc --watch",
-    "test": "tsx test/resolve.test.ts",
-    "test:watch": "tsx --watch test/resolve.test.ts", 
-    "test:coverage": "c8 tsx test/resolve.test.ts",
-    "lint": "eslint src/ --ext .ts",
-    "lint:fix": "eslint src/ --ext .ts --fix",
-    "format": "prettier --write src/ test/",
-    "format:check": "prettier --check src/ test/",
-    "typecheck": "tsc --noEmit",
-    "demo": "serve demo --open",
-    "demo:dev": "serve demo --cors",
-    "prepublishOnly": "npm run build && npm run test && npm run lint",
+    "//": "=== BUILD COMMANDS ===",
+    "build": "npm run build --workspaces",
+    "build:core": "npm run build --workspace=@ansregistry/core",
+    "build:watch": "npm run build:core && npm run build:core -- --watch",
+    "clean": "npm run clean --workspaces",
+    "clean:all": "npm run clean && rm -rf node_modules packages/*/node_modules",
+    
+    "//": "=== DEVELOPMENT COMMANDS ===",
+    "dev": "npm run build:core && npx serve . -p 3000",
+    "dev:watch": "concurrently \"npm run build:watch\" \"npm run serve:delay\"",
+    "serve": "serve . -p 3000",
+    "serve:delay": "sleep 3 && serve . -p 3000",
+    
+    "//": "=== ADMIN INTERFACE ===",
+    "admin": "npm run build:core && npx serve . -p 3000 && echo 'Open http://localhost:3000/admin-ui/'",
+    "admin:quick": "npx serve . -p 3000",
+    "admin:dev": "concurrently \"npm run build:watch\" \"sleep 2 && serve . -p 3000\"",
+    
+    "//": "=== TESTING ===",
+    "test": "npm run test --workspaces",
+    "test:core": "npm run test --workspace=@ansregistry/core",
+    "typecheck": "npm run typecheck --workspaces",
+    "typecheck:core": "npm run typecheck --workspace=@ansregistry/core",
+    
+    "//": "=== DEMO & EXAMPLES ===",
+    "demo": "npm run build:core && npx serve demo -p 3001",
+    "examples": "npm run build:core && npx serve examples -p 3002",
+    
+    "//": "=== RELEASE & PUBLISH ===",
+    "version": "npm run build && npm run test",
     "prepack": "npm run build",
-    "semantic-release": "semantic-release"
+    "publish:core": "npm publish --workspace=@ansregistry/core",
+    "publish:dry": "npm publish --workspace=@ansregistry/core --dry-run",
+    
+    "//": "=== MAINTENANCE ===",
+    "lint": "eslint packages/*/src/**/*.ts",
+    "lint:fix": "eslint packages/*/src/**/*.ts --fix",
+    "format": "prettier --write packages/*/src/**/*.ts",
+    "install:all": "npm install && npm install --workspaces",
+    
+    "//": "=== SHORTCUTS ===",
+    "start": "npm run admin",
+    "dev:full": "npm run admin:dev"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "concurrently": "^8.2.0",
+    "serve": "^14.2.0",
     "typescript": "^5.0.0",
-    "tsx": "^4.0.0",
-    "serve": "^14.0.0",
     "eslint": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0", 
-    "prettier": "^3.0.0",
-    "c8": "^8.0.0",
-    "semantic-release": "^22.0.0"
+    "@typescript-eslint/parser": "^6.0.0",
+    "prettier": "^3.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "funding": {
-    "type": "individual",
-    "url": "https://github.com/sponsors/ANSRegistry"
-  }
+  "files": [
+    "packages/*/dist",
+    "admin-ui",
+    "demo",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ]
 }

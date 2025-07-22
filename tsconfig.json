@@ -1,35 +1,66 @@
 {
     "compilerOptions": {
-      "target": "ES2020",
-      "module": "CommonJS",
-      "moduleResolution": "node",
-      "lib": ["ES2020", "DOM"],
-      "outDir": "./dist",
-      "rootDir": "./src",
+      // Compilation targets
+      "target": "ES2022",
+      "module": "ESNext",
+      "moduleResolution": "bundler",
+      "lib": ["ES2022", "DOM"],
+      
+      // Strict type checking
       "strict": true,
-      "esModuleInterop": true,
+      "noImplicitAny": true,
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "noImplicitReturns": true,
+      "noFallthroughCasesInSwitch": true,
+      "noUncheckedIndexedAccess": true,
+      
+      // Module resolution
       "allowSyntheticDefaultImports": true,
-      "skipLibCheck": true,
+      "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      
+      // Output
       "declaration": true,
       "declarationMap": true,
       "sourceMap": true,
-      "removeComments": true,
-      "noImplicitAny": true,
-      "noImplicitReturns": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "exactOptionalPropertyTypes": true,
-      "resolveJsonModule": true
+      "removeComments": false,
+      "importHelpers": true,
+      
+      // Performance
+      "skipLibCheck": true,
+      "incremental": true,
+      "composite": true,
+      
+      // Paths for monorepo (optional)
+      "baseUrl": ".",
+      "paths": {
+        "@ansregistry/core": ["packages/core/src"],
+        "@ansregistry/gateway": ["packages/gateway/src"],
+        "@ansregistry/types": ["packages/types/src"]
+      }
     },
-    "include": [
-      "src/**/*"
+    
+    // Ne pas inclure de fichiers à ce niveau
+    "files": [],
+    
+    // Références aux projets du monorepo
+    "references": [
+      { "path": "./packages/core" },
+      { "path": "./packages/gateway" },
+      { "path": "./apps/admin-ui" }
     ],
+    
+    // Exclusions globales
     "exclude": [
       "node_modules",
       "dist",
-      "test",
-      "demo",
-      "**/*.test.ts"
+      "build",
+      "coverage",
+      "**/*.test.ts",
+      "**/*.spec.ts"
     ]
   }
+  

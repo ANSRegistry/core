@@ -343,3 +343,118 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ---
 
 **Made with ❤️ by [Philippe Bolduc](https://github.com/pbolduc) and the ANS Registry community**
+
+
+
+**Voici le package.json racine complet pour build et servir !** 🎯## **🚀 Commandes principales à utiliser**
+
+### **🔧 Build automatique + interface**
+```bash
+npm run dev
+# → Build core + serve interface sur localhost:3000
+# → Aller à: http://localhost:3000/admin-ui/
+```
+
+### **🔥 Développement avec watch mode**
+```bash
+npm run dev:full
+# → Build core en watch + serve interface
+# → Rebuild automatique sur changements
+```
+
+### **⚡ Interface rapide (si core déjà buildé)**
+```bash
+npm run admin:quick
+# → Serve seulement (pas de rebuild)
+```
+
+### **🧪 Build + test**
+```bash
+npm run build
+npm run test
+```
+
+## **💡 Scripts utiles**
+
+### **Build seulement le core**
+```bash
+npm run build:core
+```
+
+### **Watch mode pour développement**
+```bash
+npm run build:watch
+# → Rebuild automatique sur changements TypeScript
+```
+
+### **Démarrage simple**
+```bash
+npm start
+# → Équivalent à npm run admin
+```
+
+## **📋 Installation des dépendances**
+
+```bash
+# Installer toutes les dépendances
+npm install
+
+# Si vous voulez installer explicitement dans workspaces
+npm run install:all
+```
+
+## **🎯 Workflow quotidien recommandé**
+
+### **1. Développement actif**
+```bash
+npm run dev:full
+# → Terminal unique avec build automatique + serveur
+```
+
+### **2. Test rapide**
+```bash
+npm run admin:quick
+# → Interface immédiate si pas de changements code
+```
+
+### **3. Build production**
+```bash
+npm run build
+npm run test
+# → Build propre + validation
+```
+
+## **🔧 Scripts de maintenance**
+
+```bash
+# Clean builds
+npm run clean
+
+# Linting
+npm run lint:fix
+
+# Formatting
+npm run format
+
+# Type checking sans build
+npm run typecheck
+```
+
+## **✅ Utilisation immédiate**
+
+```bash
+# 1. Créer ce package.json à la racine
+# 2. Installer dépendances
+npm install
+
+# 3. Démarrer développement
+npm run dev
+# → Build core + interface sur localhost:3000
+
+# 4. Ouvrir navigateur
+# → http://localhost:3000/admin-ui/
+```
+
+**Ce package.json vous donne tous les outils pour développer efficacement !** 🏆
+
+**Voulez-vous l'installer maintenant ?**

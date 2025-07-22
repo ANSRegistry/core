@@ -1,0 +1,29 @@
+{
+    "name": "@ansregistry/core",
+    "version": "0.1.0",
+    "description": "Universal naming for AI agents - Core resolver",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "scripts": {
+      "build": "tsc",
+      "dev": "tsc --watch",
+      "test": "tsx test/resolve.test.ts",
+      "test:watch": "tsx --watch test/resolve.test.ts"
+    },
+    "dependencies": {},
+    "devDependencies": {
+      "@types/node": "^20.0.0",
+      "typescript": "^5.0.0",
+      "tsx": "^4.0.0"
+    },
+    "files": [
+      "dist/",
+      "README.md"
+    ]
+  }

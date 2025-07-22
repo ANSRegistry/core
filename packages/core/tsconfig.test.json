@@ -1,0 +1,17 @@
+{
+    "extends": "./tsconfig.json",
+    
+    "compilerOptions": {
+      // Pas d'output pour les tests
+      "noEmit": true,
+      
+      // Types pour tests
+      "types": ["node", "jest"]
+    },
+    
+    "include": [
+      "src/**/*",
+      "test/**/*"
+    ]
+  }
+  

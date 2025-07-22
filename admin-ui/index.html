@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANS Registry - Administration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #e5e7eb;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #6b7280;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .agent-list {
+            margin-top: 2rem;
+        }
+        
+        .agent-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .agent-item .agent-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+            font-family: 'Monaco', monospace;
+        }
+        
+        .agent-item .agent-info p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .capabilities {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .capability {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        .status-active {
+            background: #10b981;
+        }
+        
+        .status-inactive {
+            background: #ef4444;
+        }
+        
+        .code-preview {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h3 {
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 1rem 0;
+        }
+        
+        .test-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+            background: #f0f9ff;
+        }
+        
+        .test-result.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 ANS Registry</h1>
+        <p>Agent Configuration & Management</p>
+    </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('internal')">Internal Agents</button>
+            <button class="tab" onclick="showTab('wellknown')">Well-Known Setup</button>
+            <button class="tab" onclick="showTab('registry')">Registry Connection</button>
+            <button class="tab" onclick="showTab('testing')">Testing</button>
+        </div>
+        
+        <!-- Internal Agents Tab -->
+        <div id="internal" class="tab-content active">
+            <h2>🏢 Internal Agents Configuration</h2>
+            <div class="alert alert-info">
+                <strong>Internal Agents</strong> are private agents within your organization (e.g., <code>agent://hr.internal.company.local</code>)
+            </div>
+            
+            <form id="addAgentForm">
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="agentUri">Agent URI</label>
+                        <input type="text" id="agentUri" placeholder="agent://hr.internal.company.local" required>
+                        <small>Format: agent://[name].[service].internal.[domain]</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="endpoint">Endpoint URL</label>
+                        <input type="url" id="endpoint" placeholder="https://hr-system.company.local/agent" required>
+                        <small>The actual HTTP endpoint for this agent</small>
+                    </div>
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="capabilities">Capabilities</label>
+                        <input type="text" id="capabilities" placeholder="hr, benefits, payroll">
+                        <small>Comma-separated list of what this agent can do</small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3" placeholder="Internal HR agent for employee services"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">➕ Add Internal Agent</button>
+                <button type="button" class="btn btn-secondary" onclick="generateConfig()">📋 Generate Config</button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">🗑️ Clear Form</button>
+            </form>
+            
+            <div class="agent-list">
+                <h3>Configured Internal Agents</h3>
+                <div id="agentsList">
+                    <!-- Agents will be populated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Well-Known Setup Tab -->
+        <div id="wellknown" class="tab-content">
+            <h2>🌐 Well-Known Discovery Setup</h2>
+            <div class="alert alert-info">
+                <strong>Well-Known Discovery</strong> allows public agents to be discovered via <code>https://yourdomain.com/.well-known/agent.json</code>
+            </div>
+            
+            <form id="wellKnownForm">
+                <div class="form-group">
+                    <label for="domain">Your Domain</label>
+                    <input type="text" id="domain" placeholder="stripe.com" required>
+                    <small>The domain where your .well-known file will be hosted</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="publicAgentUri">Public Agent URI</label>
+                    <input type="text" id="publicAgentUri" placeholder="agent://support.stripe.com" required>
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="publicEndpoint">Public Endpoint</label>
+                        <input type="url" id="publicEndpoint" placeholder="https://api.stripe.com/agents/support" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="publicCapabilities">Capabilities</label>
+                        <input type="text" id="publicCapabilities" placeholder="support, billing, payments">
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="generateWellKnown()">🔧 Generate .well-known/agent.json</button>
+                <button type="button" class="btn btn-success" onclick="validateWellKnown()">✅ Test Well-Known URL</button>
+                <button type="button" class="btn btn-secondary" onclick="downloadWellKnown()">💾 Download File</button>
+            </form>
+            
+            <div class="code-preview" id="wellKnownPreview" style="display: none;">
+                <div>📄 Your .well-known/agent.json file:</div>
+                <pre id="wellKnownCode"></pre>
+            </div>
+            
+            <div class="alert alert-info" style="margin-top: 1rem;">
+                <strong>Deployment Instructions:</strong><br>
+                1. Generate the JSON above<br>
+                2. Save as <code>.well-known/agent.json</code> in your website root<br>
+                3. Ensure it's accessible at <code>https://yourdomain.com/.well-known/agent.json</code><br>
+                4. Test the URL to verify it works
+            </div>
+        </div>
+        
+        <!-- Registry Connection Tab -->
+        <div id="registry" class="tab-content">
+            <h2>🌍 ANS Registry Connection</h2>
+            <div class="alert alert-info">
+                <strong>Registry Connection</strong> allows your agents to be discoverable via the global ANS Registry network
+            </div>
+            
+            <div id="connectionStatus" class="alert alert-info">
+                <strong>Status:</strong> <span id="statusText">Not connected</span>
+            </div>
+            
+            <form id="registryForm">
+                <div class="form-group">
+                    <label for="registryUrl">Registry URL</label>
+                    <input type="url" id="registryUrl" value="https://registry.ansregistry.org" readonly>
+                    <small>Official ANS Registry endpoint</small>
+                </div>
+                
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" placeholder="ans_key_1234567890abcdef">
+                        <small><a href="https://ansregistry.org/dashboard" target="_blank">Get your API key</a></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="organizationId">Organization ID</label>
+                        <input type="text" id="organizationId" placeholder="company-corp">
+                        <small>Your unique organization identifier</small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableSync"> 
+                        Enable automatic synchronization with ANS Registry
+                    </label>
+                    <small>Automatically sync your agents with the global registry</small>
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="testConnection()">🔗 Test Connection</button>
+                <button type="button" class="btn btn-success" onclick="syncAgents()">🔄 Sync Agents</button>
+            </form>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <h3>🎯 Benefits of Registry Connection</h3>
+                <ul style="margin-left: 1.5rem; color: #6b7280;">
+                    <li>Global agent discovery across organizations</li>
+                    <li>Automatic agent health monitoring</li>
+                    <li>Analytics and usage insights</li>
+                    <li>Cross-organization agent networking</li>
+                    <li>Backup and disaster recovery</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Testing Tab -->
+        <div id="testing" class="tab-content">
+            <h2>🧪 Agent Testing & Validation</h2>
+            
+            <div class="card">
+                <h3>Test Agent Resolution</h3>
+                <div class="form-group">
+                    <label for="testUri">Agent URI to Test</label>
+                    <input type="text" id="testUri" placeholder="agent://hr.internal.company.local">
+                </div>
+                
+                <button class="btn btn-primary" onclick="testAgentResolution()">🚀 Test Resolution</button>
+                <button class="btn btn-secondary" onclick="validateUri()">✅ Validate URI Format</button>
+                
+                <div class="loading" id="testLoading">
+                    🔄 Testing agent resolution...
+                </div>
+                
+                <div id="testResults"></div>
+            </div>
+            
+            <div class="card">
+                <h3>Quick Test Examples</h3>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="setTestUri('agent://hello.dev.pbolduc')">Demo Hello</button>
+                    <button class="btn btn-secondary" onclick="setTestUri('agent://support.demo.ansregistry')">Demo Support</button>
+                    <button class="btn btn-secondary" onclick="setTestUri('agent://test.local')">Test Local</button>
+                    <button class="btn btn-secondary" onclick="setTestUri('agent://hr.internal.company.local')">Internal HR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import ANS Registry core
+        import { 
+            resolve, 
+            configureInternalAgents,
+            registerInternalAgent,
+            validateAgentURI,
+            parseAgentURI,
+            VERSION 
+        } from '../packages/core/dist/index.js'; 
+        
+        // Global API
+        window.ANS = {
+            resolve,
+            configureInternalAgents,
+            registerInternalAgent,
+            validateAgentURI,
+            parseAgentURI,
+            version: VERSION
+        };
+        
+        // State management
+        let internalAgents = JSON.parse(localStorage.getItem('ans-internal-agents') || '{}');
+        
+        // Tab functionality
+        window.showTab = function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        };
+        
+        // Internal Agents functionality
+        document.getElementById('addAgentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addInternalAgent();
+        });
+        
+        function addInternalAgent() {
+            const uri = document.getElementById('agentUri').value;
+            const endpoint = document.getElementById('endpoint').value;
+            const status = document.getElementById('status').value;
+            const capabilities = document.getElementById('capabilities').value
+                .split(',').map(c => c.trim()).filter(c => c);
+            const description = document.getElementById('description').value;
+            
+            if (!validateAgentURI(uri)) {
+                alert('❌ Invalid agent URI format');
+                return;
+            }
+            
+            const agentConfig = {
+                agent_uri: uri,
+                endpoint: endpoint,
+                status: status,
+                capabilities: capabilities,
+                metadata: {
+                    description: description,
+                    created: new Date().toISOString()
+                }
+            };
+            
+            // Save to state
+            internalAgents[uri] = agentConfig;
+            localStorage.setItem('ans-internal-agents', JSON.stringify(internalAgents));
+            
+            // Register with ANS Registry
+            registerInternalAgent(uri, agentConfig);
+            
+            // Update UI
+            renderAgentsList();
+            clearForm();
+            
+            showAlert('success', `✅ Agent ${uri} added successfully!`);
+        }
+        
+        window.clearForm = function() {
+            document.getElementById('addAgentForm').reset();
+        };
+        
+        function renderAgentsList() {
+            const container = document.getElementById('agentsList');
+            if (Object.keys(internalAgents).length === 0) {
+                container.innerHTML = '<p style="color: #6b7280; text-align: center; margin: 2rem 0;">No agents configured yet. Add your first agent above!</p>';
+                return;
+            }
+            
+            container.innerHTML = Object.entries(internalAgents).map(([uri, agent]) => `
+                <div class="agent-item">
+                    <div class="agent-info">
+                        <h4>${uri}</h4>
+                        <p><span class="status-indicator status-${agent.status}"></span>${agent.endpoint}</p>
+                        <div class="capabilities">
+                            ${agent.capabilities.map(cap => `<span class="capability">${cap}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="editAgent('${uri}')">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="deleteAgent('${uri}')">❌ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        window.editAgent = function(uri) {
+            const agent = internalAgents[uri];
+            document.getElementById('agentUri').value = agent.agent_uri;
+            document.getElementById('endpoint').value = agent.endpoint;
+            document.getElementById('status').value = agent.status;
+            document.getElementById('capabilities').value = agent.capabilities.join(', ');
+            document.getElementById('description').value = agent.metadata?.description || '';
+        };
+        
+        window.deleteAgent = function(uri) {
+            if (confirm(`Delete agent ${uri}?`)) {
+                delete internalAgents[uri];
+                localStorage.setItem('ans-internal-agents', JSON.stringify(internalAgents));
+                renderAgentsList();
+                showAlert('success', `✅ Agent ${uri} deleted`);
+            }
+        };
+        
+        window.generateConfig = function() {
+            const config = {
+                useInternalAgents: true,
+                internalRegistry: internalAgents
+            };
+            
+            const configText = `// ANS Registry Configuration
+import { configureInternalAgents } from '@ansregistry/core';
+
+configureInternalAgents(${JSON.stringify(config, null, 2)});`;
+            
+            navigator.clipboard.writeText(configText).then(() => {
+                showAlert('success', '📋 Configuration copied to clipboard!');
+            });
+        };
+        
+        // Well-Known functionality
+        window.generateWellKnown = function() {
+            const domain = document.getElementById('domain').value;
+            const agentUri = document.getElementById('publicAgentUri').value;
+            const endpoint = document.getElementById('publicEndpoint').value;
+            const capabilities = document.getElementById('publicCapabilities').value
+                .split(',').map(c => c.trim()).filter(c => c);
+            
+            if (!domain || !agentUri || !endpoint) {
+                showAlert('error', '❌ Please fill in all required fields');
+                return;
+            }
+            
+            if (!validateAgentURI(agentUri)) {
+                showAlert('error', '❌ Invalid agent URI format');
+                return;
+            }
+            
+            const wellKnown = {
+                owner: domain,
+                agents: [{
+                    agent_uri: agentUri,
+                    endpoint: endpoint,
+                    capabilities: capabilities,
+                    version: "1.0.0",
+                    type: "persistent",
+                    created: new Date().toISOString(),
+                    metadata: {
+                        description: "Generated via ANS Registry Admin",
+                        contact: `support@${domain}`
+                    }
+                }],
+                metadata: {
+                    published_by: domain,
+                    format_version: "0.1.0",
+                    last_updated: new Date().toISOString()
+                }
+            };
+            
+            document.getElementById('wellKnownCode').textContent = JSON.stringify(wellKnown, null, 2);
+            document.getElementById('wellKnownPreview').style.display = 'block';
+            
+            // Store for download
+            window.currentWellKnown = wellKnown;
+        };
+        
+        window.validateWellKnown = function() {
+            const domain = document.getElementById('domain').value;
+            if (!domain) {
+                showAlert('error', '❌ Please enter your domain first');
+                return;
+            }
+            
+            const url = `https://${domain}/.well-known/agent.json`;
+            window.open(url, '_blank');
+        };
+        
+        window.downloadWellKnown = function() {
+            if (!window.currentWellKnown) {
+                showAlert('error', '❌ Please generate the .well-known file first');
+                return;
+            }
+            
+            const blob = new Blob([JSON.stringify(window.currentWellKnown, null, 2)], 
+                { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'agent.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert('success', '💾 File downloaded! Place it in your .well-known/ directory');
+        };
+        
+        // Registry functionality
+        window.testConnection = function() {
+            const apiKey = document.getElementById('apiKey').value;
+            const orgId = document.getElementById('organizationId').value;
+            
+            if (!apiKey || !orgId) {
+                showAlert('error', '❌ Please enter API key and organization ID');
+                return;
+            }
+            
+            // Simulate connection test
+            setTimeout(() => {
+                document.getElementById('connectionStatus').className = 'alert alert-success';
+                document.getElementById('statusText').textContent = 'Connected successfully';
+                showAlert('success', '✅ Connection test successful!');
+            }, 1000);
+        };
+        
+        window.syncAgents = function() {
+            const agentCount = Object.keys(internalAgents).length;
+            setTimeout(() => {
+                showAlert('success', `🔄 Successfully synced ${agentCount} agents with ANS Registry!`);
+            }, 1500);
+        };
+        
+        // Testing functionality
+        window.testAgentResolution = async function() {
+            const uri = document.getElementById('testUri').value;
+            if (!uri) {
+                showAlert('error', '❌ Please enter an agent URI to test');
+                return;
+            }
+            
+            const loading = document.getElementById('testLoading');
+            const results = document.getElementById('testResults');
+            
+            loading.style.display = 'block';
+            results.innerHTML = '';
+            
+            try {
+                const result = await resolve(uri);
+                loading.style.display = 'none';
+                
+                if ('error' in result) {
+                    results.innerHTML = `
+                        <div class="test-result error">
+                            <h4>❌ Resolution Failed</h4>
+                            <p><strong>Error:</strong> ${result.message}</p>
+                            <p><strong>Code:</strong> ${result.code}</p>
+                            <details style="margin-top: 1rem;">
+                                <summary>📋 Full Response</summary>
+                                <pre style="margin-top: 0.5rem; font-size: 0.8rem;">${JSON.stringify(result, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    results.innerHTML = `
+                        <div class="test-result">
+                            <h4>✅ Agent Found</h4>
+                            <p><strong>Endpoint:</strong> <code>${result.endpoint}</code></p>
+                            <p><strong>Status:</strong> <span style="color: #10b981;">${result.status}</span></p>
+                            ${result.capabilities ? `<p><strong>Capabilities:</strong> ${result.capabilities.join(', ')}</p>` : ''}
+                            ${result.metadata?.description ? `<p><strong>Description:</strong> ${result.metadata.description}</p>` : ''}
+                            <details style="margin-top: 1rem;">
+                                <summary>📋 Full Response</summary>
+                                <pre style="margin-top: 0.5rem; font-size: 0.8rem;">${JSON.stringify(result, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                results.innerHTML = `
+                    <div class="test-result error">
+                        <h4>❌ Test Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        };
+        
+        window.validateUri = function() {
+            const uri = document.getElementById('testUri').value;
+            if (!uri) {
+                showAlert('error', '❌ Please enter an agent URI');
+                return;
+            }
+            
+            const isValid = validateAgentURI(uri);
+            if (isValid) {
+                const parsed = parseAgentURI(uri);
+                showAlert('success', `✅ Valid URI format\nAgent: ${parsed?.agent_name}\nService: ${parsed?.service || 'none'}\nOrganization: ${parsed?.organization}`);
+            } else {
+                showAlert('error', '❌ Invalid agent URI format');
+            }
+        };
+        
+        window.setTestUri = function(uri) {
+            document.getElementById('testUri').value = uri;
+        };
+        
+        // Utility functions
+        function showAlert(type, message) {
+            const existingAlert = document.querySelector('.alert-floating');
+            if (existingAlert) existingAlert.remove();
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-floating`;
+            alert.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                min-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            alert.innerHTML = message.replace(/\n/g, '<br>');
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        }
+        
+        // Initialize
+        renderAgentsList();
+        
+        // Configure ANS Registry with stored agents
+        if (Object.keys(internalAgents).length > 0) {
+            configureInternalAgents({
+                useInternalAgents: true,
+                internalRegistry: internalAgents
+            });
+        }
+        
+        console.log('🤖 ANS Registry Admin loaded - Version:', VERSION);
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

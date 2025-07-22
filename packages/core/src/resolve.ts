@@ -234,7 +234,7 @@ function validateAgentURI(uri: string): boolean {
  */
 function parseAgentURI(uri: string) {
   const match = uri.match(/^agent:\/\/(.+)$/);
-  if (!match) return null;
+  if (!match || !match[1]) return null; // 🔧 Ajout vérification match[1]
   
   const hostname = match[1];
   const parts = hostname.split('.');
