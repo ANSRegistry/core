@@ -18,15 +18,69 @@ export {
   parseAgentURI,
   configureInternalAgents,
   registerInternalAgent,
+  listPersistentAgents,
+  removePersistentAgent,
+  clearPersistentAgents,
   DEMO_REGISTRY
-} from './resolve.js';  // ← AJOUTER .js
+} from './resolve';
+
+// Agent Discovery functions
+export {
+  discoverAgents,
+  searchAgents,
+  findAgentsByCapabilities,
+  getHealthyAgents,
+  configureDiscovery
+} from './discovery';
+
+// Health Monitoring functions
+export {
+  checkAgentHealth,
+  checkMultipleAgentsHealth,
+  getCachedHealth,
+  clearHealthCache,
+  getHealthCacheStats,
+  filterAgentsByHealth,
+  getHealthStats,
+  configureHealth
+} from './health';
+
+// Storage and persistence functions
+export {
+  SimpleStorage
+} from './storage';
 
 // Type definitions
 export type {
   AgentRecord,
   ResolutionError,
-  InternalAgentConfig
-} from './types.js';  // ← AJOUTER .js
+  InternalAgentConfig,
+  AgentMetadata,
+  ResolutionInfo,
+  WellKnownAgent,
+  WellKnownDocument,
+  ParsedAgentURI,
+  ResolverConfig,
+  HealthStatus,
+  ResolutionResult,
+  BatchResolutionResult,
+  // Agent Discovery types
+  AgentQuery,
+  DiscoveryResult,
+  DiscoverySource,
+  DiscoveredAgent,
+  AgentHealthStatus,
+  AgentHealthRecord,
+  WellKnownDiscoveryOptions,
+  GlobalRegistryOptions,
+  DiscoveryFunction
+} from './types';
+
+// Type guards
+export {
+  isAgentRecord,
+  isResolutionError
+} from './types';
 
 // Version and metadata
 export const VERSION = '0.1.0';

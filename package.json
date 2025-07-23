@@ -34,15 +34,19 @@
     "clean:all": "npm run clean && rm -rf node_modules packages/*/node_modules",
     
     "//": "=== DEVELOPMENT COMMANDS ===",
-    "dev": "npm run build:core && npx serve . -p 3000",
-    "dev:watch": "concurrently \"npm run build:watch\" \"npm run serve:delay\"",
-    "serve": "serve . -p 3000",
-    "serve:delay": "sleep 3 && serve . -p 3000",
+    "dev": "npm run build:core && npm run admin:api",
+    "dev:watch": "concurrently \"npm run build:watch\" \"npm run admin:api:delay\"",
     
     "//": "=== ADMIN INTERFACE ===",
-    "admin": "npm run build:core && npx serve . -p 3000 && echo 'Open http://localhost:3000/admin-ui/'",
-    "admin:quick": "npx serve . -p 3000",
-    "admin:dev": "concurrently \"npm run build:watch\" \"sleep 2 && serve . -p 3000\"",
+    "admin": "npm run admin:api",
+    "admin:api": "npm run build:core && node packages/core/scripts/serve-admin.js",
+    "admin:api:delay": "sleep 3 && node packages/core/scripts/serve-admin.js",
+    "admin:static": "npm run build:core && npx serve . -p 3000",
+    "admin:quick": "node packages/core/scripts/serve-admin.js",
+    
+    "//": "=== LEGACY ===",
+    "serve": "serve . -p 3000",
+    "serve:delay": "sleep 3 && serve . -p 3000",
     
     "//": "=== TESTING ===",
     "test": "npm run test --workspaces",
@@ -67,8 +71,8 @@
     "install:all": "npm install && npm install --workspaces",
     
     "//": "=== SHORTCUTS ===",
-    "start": "npm run admin",
-    "dev:full": "npm run admin:dev"
+    "start": "npm run dev",
+    "dev:full": "npm run dev:watch"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

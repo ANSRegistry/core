@@ -3,36 +3,15 @@
  * Resolve agent:// URIs to service endpoints
  */
 
-export interface AgentRecord {
-  agent_uri: string;
-  endpoint: string;
-  status: 'active' | 'inactive' | 'suspended';
-  capabilities?: string[];
-  metadata?: {
-    version?: string;
-    organization?: string;
-    description?: string;
-    contact?: string;
-    created?: string;
-    expires?: string;
-  };
-  resolution?: {
-    ttl: number;
-    cached: boolean;
-    resolver: string;
-    resolved_at: string;
-    method?: 'registry' | 'well-known' | 'dns' | 'cache' | 'internal-config' | 'internal-registry' | 'internal-well-known';
-    source?: string;
-  };
-  type?: 'persistent' | 'ephemeral' | 'system' | 'personal';
-}
-
-export interface ResolutionError {
-  error: string;
-  code: number;
-  message: string;
-  agent_uri: string;
-}
+import { SimpleStorage } from './storage.js';
+import type { 
+  AgentRecord, 
+  ResolutionError, 
+  InternalAgentConfig, 
+  StorageAgentRecord,
+  AgentMetadata,
+  ResolutionInfo
+} from './types.js';
 
 // Enhanced registry with internal agents support
 const INTERNAL_AGENTS: Record<string, AgentRecord> = {
@@ -91,7 +70,8 @@ const INTERNAL_AGENTS: Record<string, AgentRecord> = {
     }
   }
 };
-const DEMO_REGISTRY: Record<string, AgentRecord> = {
+
+export const DEMO_REGISTRY: Record<string, AgentRecord> = {
   'agent://hello.dev.pbolduc': {
     agent_uri: 'agent://hello.dev.pbolduc',
     endpoint: 'https://api.ansregistry.org/demo/hello',
@@ -124,6 +104,12 @@ const DEMO_REGISTRY: Record<string, AgentRecord> = {
       contact: 'support@ansregistry.org',
       created: new Date().toISOString(),
       expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    resolution: {
+      ttl: 300,
+      cached: false,
+      resolver: 'ansregistry.org',
+      resolved_at: new Date().toISOString()
     }
   },
   'agent://test.local': {
@@ -135,15 +121,15 @@ const DEMO_REGISTRY: Record<string, AgentRecord> = {
       version: '0.1.0',
       description: 'Local development test agent',
       created: new Date().toISOString()
+    },
+    resolution: {
+      ttl: 300,
+      cached: false,
+      resolver: 'ansregistry.org',
+      resolved_at: new Date().toISOString()
     }
   }
 };
-
-export interface InternalAgentConfig {
-  internalRegistry?: Record<string, AgentRecord>;
-  internalWellKnownSources?: string[];
-  useInternalAgents?: boolean;
-}
 
 /**
  * Global configuration for internal agents
@@ -153,6 +139,48 @@ let globalInternalConfig: InternalAgentConfig = {
   internalRegistry: {},
   internalWellKnownSources: []
 };
+
+// Storage instance for persistent agents
+let storage: SimpleStorage | null = null;
+
+/**
+ * Initialize storage (lazy loading)
+ */
+function getStorage(): SimpleStorage {
+  if (!storage) {
+    storage = new SimpleStorage();
+  }
+  return storage;
+}
+
+/**
+ * Convert storage agent record to resolver agent record
+ */
+function convertStorageToResolverAgent(storageAgent: StorageAgentRecord): AgentRecord {
+  return {
+    agent_uri: storageAgent.agent_uri,
+    endpoint: storageAgent.endpoint,
+    status: storageAgent.status === 'maintenance' ? 'suspended' : storageAgent.status,
+    capabilities: storageAgent.capabilities,
+    version: storageAgent.version,
+    metadata: {
+      version: storageAgent.version,
+      description: storageAgent.metadata?.description,
+      contact: storageAgent.metadata?.owner,
+      created: storageAgent.metadata?.created_at,
+      organization: storageAgent.metadata?.tags?.find(t => t.startsWith('org:'))?.replace('org:', ''),
+      discovery_level: storageAgent.metadata?.discovery_level
+    },
+    resolution: {
+      ttl: storageAgent.ttl || 300,
+      cached: false,
+      resolver: 'persistent-storage',
+      resolved_at: new Date().toISOString(),
+      method: 'persistent-storage'
+    },
+    type: 'persistent'
+  };
+}
 
 /**
  * Configure internal agents resolution
@@ -193,8 +221,31 @@ export function registerInternalAgent(uri: string, agent: Partial<AgentRecord>):
   }
 
   globalInternalConfig.internalRegistry[uri] = agentRecord;
+
+  // Also save to persistent storage if it's a persistent agent
+  if (agent.type === 'persistent' || !agent.type) {
+    try {
+      const storage = getStorage();
+      storage.addAgent(uri, {
+        endpoint: agent.endpoint || '',
+        status: agent.status === 'suspended' ? 'maintenance' : (agent.status || 'active'),
+        capabilities: agent.capabilities || [],
+        version: agent.version || agent.metadata?.version || '1.0.0',
+        metadata: {
+          description: agent.metadata?.description,
+          owner: agent.metadata?.contact,
+          tags: agent.metadata?.organization ? [`org:${agent.metadata.organization}`] : undefined,
+          discovery_level: agent.metadata?.discovery_level
+        },
+        ttl: agent.resolution?.ttl || 3600
+      });
+    } catch (error) {
+      console.warn('Failed to save agent to persistent storage:', error);
+    }
+  }
 }
-function validateAgentURI(uri: string): boolean {
+
+export function validateAgentURI(uri: string): boolean {
   // Check basic requirements
   if (!uri || typeof uri !== 'string' || uri.length === 0 || uri.length > 253) {
     return false;
@@ -232,9 +283,9 @@ function validateAgentURI(uri: string): boolean {
 /**
  * Parse agent URI into components
  */
-function parseAgentURI(uri: string) {
+export function parseAgentURI(uri: string) {
   const match = uri.match(/^agent:\/\/(.+)$/);
-  if (!match || !match[1]) return null; // 🔧 Ajout vérification match[1]
+  if (!match || !match[1]) return null;
   
   const hostname = match[1];
   const parts = hostname.split('.');
@@ -280,13 +331,13 @@ async function resolveViaWellKnown(uri: string): Promise<AgentRecord | null> {
           ttl: 300,
           cached: false,
           resolver: 'well-known',
-          resolved_at: new Date().toISOString()
+          resolved_at: new Date().toISOString(),
+          method: 'well-known'
         }
       };
     }
   } catch (error) {
     // Silently fail for .well-known lookup
-    // console.debug(`Well-known lookup failed for ${uri}:`, error);
   }
   
   return null;
@@ -339,11 +390,12 @@ async function resolveViaInternalWellKnown(uri: string, source: string): Promise
       return agentRecord;
     }
   } catch (error) {
-    // console.debug(`Internal well-known source ${source} failed:`, error);
+    // Silently fail
   }
   
   return null;
 }
+
 async function resolveViaDNS(_uri: string): Promise<AgentRecord | null> {
   // DNS resolution would require a DNS client
   // For v0.1, we'll simulate this or skip
@@ -373,6 +425,17 @@ export async function resolve(uri: string): Promise<AgentRecord | ResolutionErro
         resolved_at: new Date().toISOString()
       }
     };
+  }
+
+  // Try persistent storage (NEW: JSON file storage)
+  try {
+    const storage = getStorage();
+    const persistentAgent = storage.getAgent(uri);
+    if (persistentAgent && persistentAgent.status === 'active') {
+      return convertStorageToResolverAgent(persistentAgent);
+    }
+  } catch (error) {
+    console.warn('Failed to check persistent storage:', error);
   }
 
   // Try internal agents registry
@@ -509,5 +572,36 @@ export async function health(): Promise<{ status: string; timestamp: string; ver
   };
 }
 
-// Export for testing
-export { DEMO_REGISTRY, validateAgentURI, parseAgentURI };
+/**
+ * Management functions for persistent agents
+ */
+export function listPersistentAgents(): AgentRecord[] {
+  try {
+    const storage = getStorage();
+    const agents = storage.listAgents();
+    return agents.map(convertStorageToResolverAgent);
+  } catch (error) {
+    console.warn('Failed to list persistent agents:', error);
+    return [];
+  }
+}
+
+export function removePersistentAgent(uri: string): boolean {
+  try {
+    const storage = getStorage();
+    return storage.removeAgent(uri);
+  } catch (error) {
+    console.warn('Failed to remove persistent agent:', error);
+    return false;
+  }
+}
+
+export function clearPersistentAgents(): void {
+  try {
+    const storage = getStorage();
+    const agents = storage.listAgents();
+    agents.forEach(agent => storage.removeAgent(agent.agent_uri));
+  } catch (error) {
+    console.warn('Failed to clear persistent agents:', error);
+  }
+}

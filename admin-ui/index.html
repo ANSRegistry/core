@@ -204,7 +204,7 @@
             margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
         }
         
         .agent-item .agent-info h5 {
@@ -273,6 +273,10 @@
         
         .status-inactive {
             background: #ef4444;
+        }
+        
+        .status-maintenance {
+            background: #f59e0b;
         }
         
         .code-preview {
@@ -400,6 +404,63 @@
             font-size: 0.9rem;
             color: #6b7280;
         }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* Developer API Interface Styles */
+        #discovery .card {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+        }
+        
+        #discovery .card h3 {
+            color: #f1f5f9 !important;
+            border-bottom: 2px solid #3b82f6 !important;
+            padding-bottom: 0.5rem;
+        }
+        
+        #discovery input,
+        #discovery select {
+            background: #1e293b !important;
+            border: 1px solid #475569 !important;
+            color: #e2e8f0 !important;
+            font-family: Monaco, monospace !important;
+        }
+        
+        #discovery input:focus,
+        #discovery select:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+        
+        #discovery .quick-test-card:hover {
+            border-color: #3b82f6 !important;
+            background: #475569 !important;
+        }
+        
+        #discovery .btn-primary {
+            background: #3b82f6 !important;
+        }
+        
+        #discovery .btn-primary:hover {
+            background: #2563eb !important;
+        }
+        
+        #discovery .btn-secondary {
+            background: #475569 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        #discovery .btn-secondary:hover {
+            background: #64748b !important;
+        }
     </style>
 </head>
 <body>
@@ -411,6 +472,7 @@
     <div class="container">
         <div class="tabs">
             <button class="tab active" onclick="showTab('agents')">Agents</button>
+            <button class="tab" onclick="showTab('discovery')">🔍 Discovery API</button>
             <button class="tab" onclick="showTab('wellknown')">Well-Known Generation</button>
             <button class="tab" onclick="showTab('registry')">Registry Connection</button>
             <button class="tab" onclick="showTab('testing')">Testing</button>
@@ -420,7 +482,7 @@
         <div id="agents" class="tab-content active">
             <h2>🤖 Agent Management</h2>
             <div class="alert alert-info">
-                <strong>Agent Registry:</strong> Configure your agents and choose their discovery level. Public agents will be included in .well-known discovery, internal agents are for your organization only, and private agents require manual configuration.
+                <strong>Agent Registry:</strong> Configure your agents and choose their discovery level. Agents are saved to JSON files for persistence.
             </div>
             
             <!-- Agent Statistics -->
@@ -474,7 +536,7 @@
                         <select id="status">
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
-                            <option value="suspended">Suspended</option>
+                            <option value="maintenance">Maintenance</option>
                         </select>
                     </div>
                 </div>
@@ -645,31 +707,330 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Discovery API Test Interface -->
+        <div id="discovery" class="tab-content">
+            <h2 style="color: #f1f5f9; font-family: Monaco, monospace;">🔍 Discovery API - Test Interface</h2>
+            <div class="alert alert-info" style="background: #1e293b; border-left: 4px solid #3b82f6; color: #cbd5e1;">
+                <strong>API Backend pour le Gateway:</strong> Interface de test pour développeurs - Discovery Engine que le Gateway utilise pour trouver les bons agents.
+            </div>
+            
+            <!-- Quick Test Scenarios for Gateway -->
+            <div class="card" style="background: #1e293b; border: 1px solid #334155;">
+                <h3 style="color: #f1f5f9; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem;">⚡ Tests rapides (scénarios Gateway)</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                    <div class="quick-test-card" onclick="quickGatewayTest('billing')" style="background: #334155; border: 1px solid #475569; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.3s;">
+                        <h4 style="margin-bottom: 0.5rem; color: #f1f5f9;">💳 Besoin Billing</h4>
+                        <p style="font-size: 0.9rem; color: #94a3b8;">Gateway cherche agents pour traiter un paiement</p>
+                    </div>
+                    
+                    <div class="quick-test-card" onclick="quickGatewayTest('support')" style="background: #334155; border: 1px solid #475569; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.3s;">
+                        <h4 style="margin-bottom: 0.5rem; color: #f1f5f9;">🎧 Besoin Support</h4>
+                        <p style="font-size: 0.9rem; color: #94a3b8;">Agents support client disponibles</p>
+                    </div>
+                    
+                    <div class="quick-test-card" onclick="quickGatewayTest('healthy')" style="background: #334155; border: 1px solid #475569; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.3s;">
+                        <h4 style="margin-bottom: 0.5rem; color: #f1f5f9;">💚 Prod-Ready Only</h4>
+                        <p style="font-size: 0.9rem; color: #94a3b8;">Filtre par santé pour production</p>
+                    </div>
+                    
+                    <div class="quick-test-card" onclick="quickGatewayTest('fallback')" style="background: #334155; border: 1px solid #475569; border-radius: 8px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.3s;">
+                        <h4 style="margin-bottom: 0.5rem; color: #f1f5f9;">🔄 Fallback Strategy</h4>
+                        <p style="font-size: 0.9rem; color: #94a3b8;">Alternatives si agent principal fail</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Discovery API Interface -->
+            <div class="card" style="background: #1e293b; border: 1px solid #334155;">
+                <div style="background: #334155; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; font-family: Monaco, monospace; background: #059669; color: white;">POST</span>
+                        <span style="font-family: Monaco, monospace; font-size: 1.1rem; color: #60a5fa;">/api/discover</span>
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">
+                        API principale pour le Gateway - trouve les meilleurs agents selon les critères
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <!-- Query Parameters -->
+                        <div style="background: #334155; padding: 1.5rem; border-radius: 8px;">
+                            <h4 style="margin-bottom: 1rem; color: #f1f5f9;">🎯 Critères de recherche</h4>
+                            
+                            <div class="form-group">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Capabilities requises</label>
+                                <input type="text" id="devCapabilities" placeholder="billing,payment" style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace; font-size: 0.9rem;">
+                                <small style="color: #94a3b8;">Séparées par virgules</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Statut requis</label>
+                                <select id="devStatus" multiple style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                                    <option value="active" selected>Active</option>
+                                    <option value="maintenance">Maintenance</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Santé requise</label>
+                                <select id="devHealthStatus" multiple style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                                    <option value="healthy" selected>Healthy</option>
+                                    <option value="degraded">Degraded</option>
+                                    <option value="unhealthy">Unhealthy</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Score santé minimum</label>
+                                <input type="number" id="devMinHealthScore" value="70" min="0" max="100" style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Limite résultats</label>
+                                <input type="number" id="devLimit" value="10" min="1" max="100" style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                            </div>
+                        </div>
+                        
+                        <!-- Discovery Sources -->
+                        <div style="background: #334155; padding: 1.5rem; border-radius: 8px;">
+                            <h4 style="margin-bottom: 1rem; color: #f1f5f9;">📡 Sources de découverte</h4>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="devIncludeLocal" checked>
+                                    <label for="devIncludeLocal" style="color: #cbd5e1;">📁 Local Storage</label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="devIncludeWellKnown" checked>
+                                    <label for="devIncludeWellKnown" style="color: #cbd5e1;">🌐 Well-Known</label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="devIncludeGlobal">
+                                    <label for="devIncludeGlobal" style="color: #cbd5e1;">🌍 Global Registry</label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="margin-top: 1rem;">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Organisation spécifique</label>
+                                <input type="text" id="devOrganization" placeholder="stripe.com" style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="color: #cbd5e1; font-size: 0.9rem;">Discovery Level</label>
+                                <select id="devDiscoveryLevel" multiple style="width: 100%; padding: 0.75rem; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                                    <option value="public" selected>Public</option>
+                                    <option value="internal" selected>Internal</option>
+                                    <option value="private" selected>Private</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="testDiscoveryAPI()" style="background: #3b82f6; margin-right: 0.5rem;">🚀 Test Discovery</button>
+                        <button class="btn btn-secondary" onclick="generateDiscoveryCurl()" style="background: #475569;">📋 Générer cURL</button>
+                        <button class="btn btn-secondary" onclick="clearDevForm()" style="background: #475569;">🗑️ Reset</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional APIs -->
+            <div class="card" style="background: #1e293b; border: 1px solid #334155;">
+                <h3 style="color: #f1f5f9; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem;">🔧 APIs complémentaires</h3>
+                
+                <div style="background: #334155; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; font-family: Monaco, monospace; background: #0ea5e9; color: white;">GET</span>
+                        <span style="font-family: Monaco, monospace; color: #60a5fa;">/api/search/{query}</span>
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">Recherche textuelle simple dans tous les agents</p>
+                    <div>
+                        <input type="text" id="devSearchQuery" placeholder="billing stripe" style="width: 300px; margin-right: 1rem; padding: 0.5rem; border: 1px solid #475569; border-radius: 4px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                        <button class="btn btn-primary" onclick="testSearchAPI()" style="background: #3b82f6;">🔍 Test Search</button>
+                    </div>
+                </div>
+                
+                <div style="background: #334155; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; font-family: Monaco, monospace; background: #0ea5e9; color: white;">GET</span>
+                        <span style="font-family: Monaco, monospace; color: #60a5fa;">/api/healthy</span>
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">Agents en bonne santé seulement (pour production)</p>
+                    <button class="btn btn-primary" onclick="testHealthyAPI()" style="background: #3b82f6;">💚 Test Healthy</button>
+                </div>
+                
+                <div style="background: #334155; border-radius: 8px; padding: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <span style="padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: 600; font-size: 0.8rem; font-family: Monaco, monospace; background: #0ea5e9; color: white;">GET</span>
+                        <span style="font-family: Monaco, monospace; color: #60a5fa;">/api/capabilities/{caps}</span>
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 1rem;">Trouve agents par capabilities spécifiques</p>
+                    <div>
+                        <input type="text" id="devCapabilitiesQuery" placeholder="pay,billing" style="width: 300px; margin-right: 1rem; padding: 0.5rem; border: 1px solid #475569; border-radius: 4px; background: #1e293b; color: #e2e8f0; font-family: Monaco, monospace;">
+                        <button class="btn btn-primary" onclick="testCapabilitiesAPI()" style="background: #3b82f6;">🎯 Test Capabilities</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Response Section -->
+            <div class="card" style="background: #1e293b; border: 1px solid #334155;">
+                <h3 style="color: #f1f5f9; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem;">📊 Réponse API</h3>
+                
+                <div id="devResponseMetrics" style="display: none; margin-bottom: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: #334155; border-radius: 6px; border: 1px solid #475569;">
+                            <div id="devAgentsFound" style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">-</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">Agents trouvés</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #334155; border-radius: 6px; border: 1px solid #475569;">
+                            <div id="devQueryTime" style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">-</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">Temps requête</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #334155; border-radius: 6px; border: 1px solid #475569;">
+                            <div id="devSourcesUsed" style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">-</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">Sources utilisées</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #334155; border-radius: 6px; border: 1px solid #475569;">
+                            <div id="devHealthyCount" style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;">-</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">Agents sains</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #0f172a; border-radius: 8px; padding: 1.5rem; border: 1px solid #334155;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h4 style="color: #f1f5f9;">Response</h4>
+                        <div id="devStatusBadge" style="display: none; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;"></div>
+                    </div>
+                    <div id="devResponseBody" style="background: #020617; border-radius: 6px; padding: 1rem; font-family: Monaco, monospace; font-size: 0.85rem; line-height: 1.4; color: #94a3b8; overflow-x: auto; border: 1px solid #1e293b; min-height: 200px;">
+                        Aucune requête effectuée. Utilisez les boutons ci-dessus pour tester l'API Discovery.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script type="module">
-        // Import ANS Registry core
-        import { 
-            resolve, 
-            configureInternalAgents,
-            registerInternalAgent,
-            validateAgentURI,
-            parseAgentURI,
-            VERSION 
-        } from '../packages/core/dist/index.js'; 
-        
-        // Global API
-        window.ANS = {
-            resolve,
-            configureInternalAgents,
-            registerInternalAgent,
-            validateAgentURI,
-            parseAgentURI,
-            version: VERSION
-        };
+    <script>
+        // Configuration pour l'API backend
+        const API_BASE = '/api';
         
         // State management
-        let agents = JSON.parse(localStorage.getItem('ans-agents') || '{}');
+        let agents = [];
+        let editingAgent = null; // ✅ Ajouté pour tracker l'édition
+        
+        // Utility functions d'abord
+        function showAlert(type, message) {
+            const existingAlert = document.querySelector('.alert-floating');
+            if (existingAlert) existingAlert.remove();
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-floating`;
+            alert.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                min-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            alert.innerHTML = message.replace(/\n/g, '<br>');
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        }
+
+        // API Functions
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: 'Network error' }));
+                    throw new Error(error.error || `HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        async function loadAgents() {
+            try {
+                agents = await apiCall('/agents');
+                renderAgentsList();
+                updateStats();
+            } catch (error) {
+                showAlert('error', `❌ Failed to load agents: ${error.message}`);
+                agents = [];
+            }
+        }
+
+        async function saveAgent(agentData) {
+            try {
+                await apiCall('/agents', {
+                    method: 'POST',
+                    body: JSON.stringify(agentData)
+                });
+                await loadAgents(); // Reload from server
+                showAlert('success', `✅ Agent ${agentData.agent_uri} added successfully!`);
+            } catch (error) {
+                showAlert('error', `❌ Failed to add agent: ${error.message}`);
+                throw error;
+            }
+        }
+
+        async function updateAgent(originalUri, agentData) {
+            try {
+                await apiCall(`/agents/${encodeURIComponent(originalUri)}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(agentData)
+                });
+                await loadAgents(); // Reload from server
+                showAlert('success', `✅ Agent ${agentData.agent_uri} updated successfully!`);
+            } catch (error) {
+                showAlert('error', `❌ Failed to update agent: ${error.message}`);
+                throw error;
+            }
+        }
+        async function deleteAgentFromServer(uri) {
+            try {
+                await apiCall(`/agents/${encodeURIComponent(uri)}`, {
+                    method: 'DELETE'
+                });
+                await loadAgents(); // Reload from server
+                showAlert('success', `✅ Agent ${uri} deleted`);
+            } catch (error) {
+                showAlert('error', `❌ Failed to delete agent: ${error.message}`);
+                throw error;
+            }
+        }
+
+        async function resolveAgent(uri) {
+            try {
+                return await apiCall(`/resolve/${encodeURIComponent(uri)}`);
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Simple URI validation function
+        function validateAgentURI(uri) {
+            return /^agent:\/\/[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/.test(uri);
+        }
         
         // Tab functionality
         window.showTab = function(tabName) {
@@ -714,79 +1075,85 @@
         document.getElementById('discoveryLevel').dispatchEvent(new Event('change'));
         
         // Agent management functionality
-        document.getElementById('addAgentForm').addEventListener('submit', function(e) {
+        document.getElementById('addAgentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            addAgent();
+            await addAgent();
         });
         
-        function addAgent() {
-            const uri = document.getElementById('agentUri').value;
-            const endpoint = document.getElementById('endpoint').value;
+        async function addAgent() {
+            const uri = document.getElementById('agentUri').value.trim();
+            const endpoint = document.getElementById('endpoint').value.trim();
             const discoveryLevel = document.getElementById('discoveryLevel').value;
             const status = document.getElementById('status').value;
             const capabilities = document.getElementById('capabilities').value
                 .split(',').map(c => c.trim()).filter(c => c);
-            const description = document.getElementById('description').value;
+            const description = document.getElementById('description').value.trim();
             
             if (!validateAgentURI(uri)) {
-                alert('❌ Invalid agent URI format');
+                showAlert('error', '❌ Invalid agent URI format');
                 return;
             }
             
             const agentConfig = {
                 agent_uri: uri,
                 endpoint: endpoint,
-                discovery_level: discoveryLevel,
                 status: status,
                 capabilities: capabilities,
+                version: '1.0.0',
                 metadata: {
                     description: description,
-                    created: new Date().toISOString()
+                    discovery_level: discoveryLevel
                 }
             };
             
-            // Save to state
-            agents[uri] = agentConfig;
-            localStorage.setItem('ans-agents', JSON.stringify(agents));
-            
-            // Register with ANS Registry (for resolution)
-            registerInternalAgent(uri, agentConfig);
-            
-            // Update UI
-            renderAgentsList();
-            updateStats();
-            clearForm();
-            
-            showAlert('success', `✅ Agent ${uri} added successfully!`);
+            try {
+                if (editingAgent) {
+                    // Update existing agent
+                    await updateAgent(editingAgent, agentConfig);
+                } else {
+                    // Create new agent
+                    await saveAgent(agentConfig);
+                }
+                clearForm();
+                editingAgent = null; // Reset editing state
+            } catch (error) {
+                // Error already shown by saveAgent/updateAgent
+            }
         }
         
         function updateStats() {
-            const publicAgents = Object.values(agents).filter(a => a.discovery_level === 'public');
-            const internalAgents = Object.values(agents).filter(a => a.discovery_level === 'internal');
-            const privateAgents = Object.values(agents).filter(a => a.discovery_level === 'private');
+            const publicAgents = agents.filter(a => a.metadata?.discovery_level === 'public');
+            const internalAgents = agents.filter(a => a.metadata?.discovery_level === 'internal');
+            const privateAgents = agents.filter(a => a.metadata?.discovery_level === 'private');
             
             document.getElementById('publicCount').textContent = publicAgents.length;
             document.getElementById('internalCount').textContent = internalAgents.length;
             document.getElementById('privateCount').textContent = privateAgents.length;
-            document.getElementById('totalCount').textContent = Object.keys(agents).length;
+            document.getElementById('totalCount').textContent = agents.length;
         }
         
         window.clearForm = function() {
             document.getElementById('addAgentForm').reset();
             document.getElementById('discoveryLevel').dispatchEvent(new Event('change'));
+            
+            // Reset editing state
+            editingAgent = null;
+            const submitBtn = document.querySelector('#addAgentForm button[type="submit"]');
+            submitBtn.innerHTML = '➕ Add Agent';
         };
         
         function renderAgentsList() {
             const container = document.getElementById('agentsList');
-            if (Object.keys(agents).length === 0) {
+            
+            if (agents.length === 0) {
                 container.innerHTML = '<p style="color: #6b7280; text-align: center; margin: 2rem 0;">No agents configured yet. Add your first agent above!</p>';
                 return;
             }
             
             // Group agents by discovery level
-            const publicAgents = Object.entries(agents).filter(([uri, agent]) => agent.discovery_level === 'public');
-            const internalAgents = Object.entries(agents).filter(([uri, agent]) => agent.discovery_level === 'internal');
-            const privateAgents = Object.entries(agents).filter(([uri, agent]) => agent.discovery_level === 'private');
+            const publicAgents = agents.filter(agent => agent.metadata?.discovery_level === 'public');
+            const internalAgents = agents.filter(agent => agent.metadata?.discovery_level === 'internal');
+            const privateAgents = agents.filter(agent => agent.metadata?.discovery_level === 'private');
             
             let html = '';
             
@@ -823,48 +1190,57 @@
             container.innerHTML = html;
         }
         
-        function renderAgentItems(agentEntries) {
-            return agentEntries.map(([uri, agent]) => `
+        function renderAgentItems(agentArray) {
+            return agentArray.map(agent => `
                 <div class="agent-item">
                     <div class="agent-info">
-                        <h5>${uri} <span class="discovery-badge ${agent.discovery_level}">${agent.discovery_level}</span></h5>
+                        <h5>${agent.agent_uri} <span class="discovery-badge ${agent.metadata?.discovery_level || 'private'}">${agent.metadata?.discovery_level || 'private'}</span></h5>
                         <p><span class="status-indicator status-${agent.status}"></span>${agent.endpoint}</p>
                         <div class="capabilities">
-                            ${agent.capabilities.map(cap => `<span class="capability">${cap}</span>`).join('')}
+                            ${(agent.capabilities || []).map(cap => `<span class="capability">${cap}</span>`).join('')}
                         </div>
                     </div>
-                    <div>
-                        <button class="btn btn-secondary" onclick="editAgent('${uri}')">✏️ Edit</button>
-                        <button class="btn btn-danger" onclick="deleteAgent('${uri}')">❌ Delete</button>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <button class="btn btn-secondary" onclick="editAgent('${agent.agent_uri}')">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="deleteAgent('${agent.agent_uri}')">❌ Delete</button>
                     </div>
                 </div>
             `).join('');
         }
         
         window.editAgent = function(uri) {
-            const agent = agents[uri];
+            const agent = agents.find(a => a.agent_uri === uri);
+            if (!agent) return;
+            
+            // Set editing state
+            editingAgent = uri;
+            
             document.getElementById('agentUri').value = agent.agent_uri;
             document.getElementById('endpoint').value = agent.endpoint;
-            document.getElementById('discoveryLevel').value = agent.discovery_level;
+            document.getElementById('discoveryLevel').value = agent.metadata?.discovery_level || 'private';
             document.getElementById('status').value = agent.status;
-            document.getElementById('capabilities').value = agent.capabilities.join(', ');
+            document.getElementById('capabilities').value = (agent.capabilities || []).join(', ');
             document.getElementById('description').value = agent.metadata?.description || '';
             
             // Trigger discovery level change
             document.getElementById('discoveryLevel').dispatchEvent(new Event('change'));
+            
+            // Change button text to indicate editing
+            const submitBtn = document.querySelector('#addAgentForm button[type="submit"]');
+            submitBtn.innerHTML = '✏️ Update Agent';
         };
         
-        window.deleteAgent = function(uri) {
+        window.deleteAgent = async function(uri) {
             if (confirm(`Delete agent ${uri}?`)) {
-                delete agents[uri];
-                localStorage.setItem('ans-agents', JSON.stringify(agents));
-                renderAgentsList();
-                updateStats();
-                showAlert('success', `✅ Agent ${uri} deleted`);
+                try {
+                    await deleteAgentFromServer(uri);
+                } catch (error) {
+                    // Error already shown by deleteAgentFromServer
+                }
             }
         };
         
-        // Well-Known functionality - AUTO-GENERATED from public agents
+        // Well-Known functionality
         window.generateWellKnown = function() {
             const domain = document.getElementById('domain').value;
             
@@ -873,8 +1249,7 @@
                 return;
             }
             
-            // Filter only public agents
-            const publicAgents = Object.values(agents).filter(agent => agent.discovery_level === 'public');
+            const publicAgents = agents.filter(agent => agent.metadata?.discovery_level === 'public');
             
             if (publicAgents.length === 0) {
                 showAlert('error', '❌ No public agents configured. Add public agents first.');
@@ -886,7 +1261,7 @@
                 agents: publicAgents.map(agent => ({
                     agent_uri: agent.agent_uri,
                     endpoint: agent.endpoint,
-                    capabilities: agent.capabilities,
+                    capabilities: agent.capabilities || [],
                     status: agent.status,
                     public: true,
                     metadata: {
@@ -895,10 +1270,10 @@
                     }
                 })),
                 discovery_info: {
-                    total_agents: Object.keys(agents).length,
+                    total_agents: agents.length,
                     public_agents: publicAgents.length,
-                    internal_agents: Object.values(agents).filter(a => a.discovery_level === 'internal').length,
-                    private_agents: Object.values(agents).filter(a => a.discovery_level === 'private').length,
+                    internal_agents: agents.filter(a => a.metadata?.discovery_level === 'internal').length,
+                    private_agents: agents.filter(a => a.metadata?.discovery_level === 'private').length,
                     contact: `admin@${domain}`
                 },
                 metadata: {
@@ -924,10 +1299,8 @@
                 return;
             }
             
-            // Build the correct URL - handle both HTTP and HTTPS domains
             let url;
             if (domain.startsWith('http://') || domain.startsWith('https://')) {
-                // Remove trailing slash if present, then add the path
                 const cleanDomain = domain.endsWith('/') ? domain.slice(0, -1) : domain;
                 url = `${cleanDomain}/.well-known/agent.json`;
             } else {
@@ -974,7 +1347,7 @@
         };
         
         window.syncAgents = function() {
-            const agentCount = Object.keys(agents).length;
+            const agentCount = agents.length;
             setTimeout(() => {
                 showAlert('success', `🔄 Successfully synced ${agentCount} agents with ANS Registry!`);
             }, 1500);
@@ -982,7 +1355,7 @@
         
         // Testing functionality
         window.testAgentResolution = async function() {
-            const uri = document.getElementById('testUri').value;
+            const uri = document.getElementById('testUri').value.trim();
             if (!uri) {
                 showAlert('error', '❌ Please enter an agent URI to test');
                 return;
@@ -995,15 +1368,14 @@
             results.innerHTML = '';
             
             try {
-                const result = await resolve(uri);
+                const result = await resolveAgent(uri);
                 loading.style.display = 'none';
                 
-                if ('error' in result) {
+                if (result.error) {
                     results.innerHTML = `
                         <div class="test-result error">
                             <h4>❌ Resolution Failed</h4>
                             <p><strong>Error:</strong> ${result.message}</p>
-                            <p><strong>Code:</strong> ${result.code}</p>
                             <details style="margin-top: 1rem;">
                                 <summary>📋 Full Response</summary>
                                 <pre style="margin-top: 0.5rem; font-size: 0.8rem;">${JSON.stringify(result, null, 2)}</pre>
@@ -1037,7 +1409,7 @@
         };
         
         window.validateUri = function() {
-            const uri = document.getElementById('testUri').value;
+            const uri = document.getElementById('testUri').value.trim();
             if (!uri) {
                 showAlert('error', '❌ Please enter an agent URI');
                 return;
@@ -1045,8 +1417,7 @@
             
             const isValid = validateAgentURI(uri);
             if (isValid) {
-                const parsed = parseAgentURI(uri);
-                showAlert('success', `✅ Valid URI format\nAgent: ${parsed?.agent_name}\nService: ${parsed?.service || 'none'}\nOrganization: ${parsed?.organization}`);
+                showAlert('success', '✅ Valid URI format');
             } else {
                 showAlert('error', '❌ Invalid agent URI format');
             }
@@ -1056,58 +1427,378 @@
             document.getElementById('testUri').value = uri;
         };
         
-        // Utility functions
-        function showAlert(type, message) {
-            const existingAlert = document.querySelector('.alert-floating');
-            if (existingAlert) existingAlert.remove();
+        // ========================
+        // Discovery API Test Functions (Developer Interface)
+        // ========================
+        
+        window.quickGatewayTest = function(scenario) {
+            switch (scenario) {
+                case 'billing':
+                    document.getElementById('devCapabilities').value = 'billing,payment';
+                    document.getElementById('devMinHealthScore').value = '80';
+                    document.getElementById('devLimit').value = '3';
+                    break;
+                case 'support':
+                    document.getElementById('devCapabilities').value = 'support,customer-service';
+                    document.getElementById('devMinHealthScore').value = '70';
+                    document.getElementById('devLimit').value = '5';
+                    break;
+                case 'healthy':
+                    document.getElementById('devCapabilities').value = '';
+                    document.getElementById('devMinHealthScore').value = '85';
+                    // Select only healthy
+                    const healthSelect = document.getElementById('devHealthStatus');
+                    Array.from(healthSelect.options).forEach(opt => opt.selected = opt.value === 'healthy');
+                    break;
+                case 'fallback':
+                    document.getElementById('devCapabilities').value = 'billing';
+                    document.getElementById('devMinHealthScore').value = '60'; // Lower threshold for fallback
+                    document.getElementById('devLimit').value = '10'; // More options for fallback
+                    break;
+            }
+            testDiscoveryAPI();
+        };
+        
+        async function testDiscoveryAPI() {
+            const query = buildDevQuery();
+            showDevLoading();
             
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-floating`;
-            alert.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 1000;
-                min-width: 300px;
-                animation: slideIn 0.3s ease;
-            `;
-            alert.innerHTML = message.replace(/\n/g, '<br>');
-            
-            document.body.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => alert.remove(), 300);
-            }, 300);
+            try {
+                const result = await apiCall('/discover', {
+                    method: 'POST',
+                    body: JSON.stringify(query)
+                });
+                displayDevResponse(result, 200);
+            } catch (error) {
+                displayDevResponse({
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                }, 500);
+            }
         }
         
-        // Initialize
-        renderAgentsList();
-        updateStats();
+        async function testSearchAPI() {
+            const searchQuery = document.getElementById('devSearchQuery').value.trim();
+            if (!searchQuery) {
+                showAlert('error', '❌ Entrez un terme de recherche');
+                return;
+            }
+            
+            showDevLoading();
+            
+            try {
+                const result = await apiCall(`/search/${encodeURIComponent(searchQuery)}`);
+                displayDevResponse(result, 200);
+            } catch (error) {
+                displayDevResponse({
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                }, 500);
+            }
+        }
         
-        // Configure ANS Registry with stored agents
-        if (Object.keys(agents).length > 0) {
-            configureInternalAgents({
-                useInternalAgents: true,
-                internalRegistry: agents
+        async function testHealthyAPI() {
+            showDevLoading();
+            
+            try {
+                const result = await apiCall('/healthy');
+                displayDevResponse(result, 200);
+            } catch (error) {
+                displayDevResponse({
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                }, 500);
+            }
+        }
+        
+        async function testCapabilitiesAPI() {
+            const capabilities = document.getElementById('devCapabilitiesQuery').value.trim();
+            if (!capabilities) {
+                showAlert('error', '❌ Entrez des capabilities');
+                return;
+            }
+            
+            showDevLoading();
+            
+            try {
+                const result = await apiCall(`/capabilities/${encodeURIComponent(capabilities)}`);
+                displayDevResponse(result, 200);
+            } catch (error) {
+                displayDevResponse({
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                }, 500);
+            }
+        }
+        
+        function buildDevQuery() {
+            const capabilitiesText = document.getElementById('devCapabilities').value.trim();
+            const capabilities = capabilitiesText ? capabilitiesText.split(',').map(c => c.trim()).filter(c => c) : [];
+            
+            const statusElements = document.getElementById('devStatus').selectedOptions;
+            const status = Array.from(statusElements).map(opt => opt.value);
+            
+            const healthElements = document.getElementById('devHealthStatus').selectedOptions;
+            const health_status = Array.from(healthElements).map(opt => opt.value);
+            
+            const levelElements = document.getElementById('devDiscoveryLevel').selectedOptions;
+            const discovery_level = Array.from(levelElements).map(opt => opt.value);
+            
+            return {
+                capabilities: capabilities.length > 0 ? capabilities : undefined,
+                organization: document.getElementById('devOrganization').value.trim() || undefined,
+                status: status.length > 0 ? status : undefined,
+                discovery_level: discovery_level.length > 0 ? discovery_level : undefined,
+                health_status: health_status.length > 0 ? health_status : undefined,
+                limit: parseInt(document.getElementById('devLimit').value) || 10,
+                min_health_score: parseInt(document.getElementById('devMinHealthScore').value) || 0,
+                include_local: document.getElementById('devIncludeLocal').checked,
+                include_wellknown: document.getElementById('devIncludeWellKnown').checked,
+                include_global: document.getElementById('devIncludeGlobal').checked
+            };
+        }
+        
+        function showDevLoading() {
+            document.getElementById('devResponseBody').innerHTML = '<div style="text-align: center; color: #3b82f6; padding: 2rem;">🔄 Requête en cours...</div>';
+            document.getElementById('devResponseMetrics').style.display = 'none';
+            document.getElementById('devStatusBadge').style.display = 'none';
+        }
+        
+        function displayDevResponse(data, status) {
+            // Update metrics if available
+            if (data.agents) {
+                document.getElementById('devAgentsFound').textContent = data.agents.length;
+                document.getElementById('devHealthyCount').textContent = 
+                    data.agents.filter(a => a.health?.status === 'healthy' || a.status === 'active').length;
+                document.getElementById('devSourcesUsed').textContent = data.sources?.length || 1;
+            } else {
+                document.getElementById('devAgentsFound').textContent = '0';
+                document.getElementById('devHealthyCount').textContent = '0';
+                document.getElementById('devSourcesUsed').textContent = '1';
+            }
+            
+            document.getElementById('devQueryTime').textContent = `${data.query_time_ms || 0}ms`;
+            document.getElementById('devResponseMetrics').style.display = 'grid';
+            
+            // Update status badge
+            const badge = document.getElementById('devStatusBadge');
+            badge.style.display = 'block';
+            if (status === 200) {
+                badge.className = 'status-badge';
+                badge.style.background = '#065f46';
+                badge.style.color = '#a7f3d0';
+                badge.textContent = '200 OK';
+            } else {
+                badge.className = 'status-badge';
+                badge.style.background = '#991b1b';
+                badge.style.color = '#fca5a5';
+                badge.textContent = `${status} Error`;
+            }
+            
+            // Format and display JSON response
+            document.getElementById('devResponseBody').innerHTML = formatDevJSON(data);
+        }
+        
+        function formatDevJSON(obj) {
+            const jsonString = JSON.stringify(obj, null, 2);
+            return jsonString
+                .replace(/"([^"]+)":/g, '<span style="color: #60a5fa;">"$1"</span>:')
+                .replace(/: "([^"]+)"/g, ': <span style="color: #34d399;">"$1"</span>')
+                .replace(/: (\d+)/g, ': <span style="color: #fbbf24;">$1</span>')
+                .replace(/: (true|false)/g, ': <span style="color: #f472b6;">$1</span>');
+        }
+        
+        window.generateDiscoveryCurl = function() {
+            const query = buildDevQuery();
+            const curl = `curl -X POST http://localhost:3000/api/discover \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify(query, null, 2)}'`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(curl);
+                showAlert('success', '📋 cURL copié dans le presse-papier !');
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = curl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showAlert('success', '📋 cURL copié !');
+            }
+        };
+        
+        window.clearDevForm = function() {
+            document.getElementById('devCapabilities').value = '';
+            document.getElementById('devOrganization').value = '';
+            document.getElementById('devSearchQuery').value = '';
+            document.getElementById('devCapabilitiesQuery').value = '';
+            document.getElementById('devMinHealthScore').value = '0';
+            document.getElementById('devLimit').value = '10';
+            
+            // Reset multiselects to default
+            const statusSelect = document.getElementById('devStatus');
+            Array.from(statusSelect.options).forEach(opt => opt.selected = opt.value === 'active');
+            
+            const healthSelect = document.getElementById('devHealthStatus');
+            Array.from(healthSelect.options).forEach(opt => opt.selected = opt.value === 'healthy');
+            
+            const levelSelect = document.getElementById('devDiscoveryLevel');
+            Array.from(levelSelect.options).forEach(opt => opt.selected = true);
+            
+            // Reset checkboxes
+            document.getElementById('devIncludeLocal').checked = true;
+            document.getElementById('devIncludeWellKnown').checked = true;
+            document.getElementById('devIncludeGlobal').checked = false;
+            
+            // Clear response
+            document.getElementById('devResponseBody').innerHTML = 'Aucune requête effectuée. Utilisez les boutons ci-dessus pour tester l\'API Discovery.';
+            document.getElementById('devResponseMetrics').style.display = 'none';
+            document.getElementById('devStatusBadge').style.display = 'none';
+        };
+        
+        // Add hover effects for quick test cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickTestCards = document.querySelectorAll('.quick-test-card');
+            quickTestCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#3b82f6';
+                    this.style.background = '#475569';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.borderColor = '#475569';
+                    this.style.background = '#334155';
+                });
             });
-        }
+        });
         
-        console.log('🤖 ANS Registry Admin loaded - Version:', VERSION);
+        // Health monitoring functions
+        window.runHealthCheck = async function() {
+            try {
+                showAlert('info', '🔄 Running health checks...');
+                const agents = await apiCall('/agents');
+                if (agents.length === 0) {
+                    showAlert('error', '❌ No agents to check');
+                    return;
+                }
+                
+                const results = await apiCall('/health/check', {
+                    method: 'POST',
+                    body: JSON.stringify({ agents })
+                });
+                
+                const healthyCount = results.filter(r => r.health?.status === 'healthy').length;
+                const degradedCount = results.filter(r => r.health?.status === 'degraded').length;
+                const unhealthyCount = results.filter(r => r.health?.status === 'unhealthy').length;
+                
+                const resultsHtml = `
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-number" style="color: #10b981;">${healthyCount}</div>
+                            <div class="stat-label">💚 Healthy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" style="color: #f59e0b;">${degradedCount}</div>
+                            <div class="stat-label">🟡 Degraded</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" style="color: #ef4444;">${unhealthyCount}</div>
+                            <div class="stat-label">❌ Unhealthy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${results.length}</div>
+                            <div class="stat-label">📊 Total</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        ${results.map(agent => `
+                            <div class="agent-item">
+                                <div class="agent-info">
+                                    <h5>${agent.agent_uri}</h5>
+                                    <p>${agent.endpoint}</p>
+                                    ${agent.health ? `
+                                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                                            Status: <strong>${agent.health.status}</strong> (${agent.health.score}/100)<br>
+                                            Response: ${agent.health.response_time_ms || 0}ms • 
+                                            Errors: ${agent.health.error_count} • 
+                                            Uptime: ${agent.health.uptime_percentage}%
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="text-align: center;">
+                                    ${agent.health?.status === 'healthy' ? '💚' : agent.health?.status === 'degraded' ? '🟡' : '❌'}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                document.getElementById('healthResults').innerHTML = resultsHtml;
+                showAlert('success', `✅ Health check completed: ${healthyCount} healthy, ${degradedCount} degraded, ${unhealthyCount} unhealthy`);
+            } catch (error) {
+                showAlert('error', `❌ Health check failed: ${error.message}`);
+            }
+        };
         
-        // Add CSS animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+        window.getHealthStats = async function() {
+            try {
+                const stats = await apiCall('/health/stats');
+                const statsHtml = `
+                    <div class="stats-bar">
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.total_checks_performed}</div>
+                            <div class="stat-label">🔍 Total Checks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.healthy_agents}</div>
+                            <div class="stat-label">💚 Healthy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.degraded_agents}</div>
+                            <div class="stat-label">🟡 Degraded</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.unhealthy_agents}</div>
+                            <div class="stat-label">❌ Unhealthy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.average_response_time}ms</div>
+                            <div class="stat-label">⏱️ Avg Response</div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info" style="margin-top: 1rem;">
+                        <strong>Cache Stats:</strong><br>
+                        📋 Cached agents: ${stats.cache_stats.cached_agents}<br>
+                        🎯 Hit rate: ${Math.round(stats.cache_stats.cache_hit_rate * 100)}%<br>
+                        ⏰ Oldest entry: ${Math.round(stats.cache_stats.oldest_entry_age / 1000)}s ago
+                    </div>
+                `;
+                document.getElementById('healthResults').innerHTML = statsHtml;
+            } catch (error) {
+                showAlert('error', `❌ Failed to get health stats: ${error.message}`);
             }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
+        };
+        
+        window.clearHealthCache = async function() {
+            try {
+                await apiCall('/health/cache', { method: 'DELETE' });
+                showAlert('success', '✅ Health cache cleared');
+            } catch (error) {
+                showAlert('info', '💡 Health cache clearing not implemented in API yet');
             }
-        `;
-        document.head.appendChild(style);
+        };
+        
+        // Initialize - Load agents from server
+        loadAgents();
+        
+        console.log('🤖 ANS Registry Admin loaded with JSON persistence and Agent Discovery');
+        console.log('🔍 Agent Discovery features:');
+        console.log('  • Multi-source discovery (local, well-known, global)');
+        console.log('  • Advanced filtering (capabilities, status, health)');
+        console.log('  • Text search across agents');
+        console.log('  • Health monitoring and statistics');
+        console.log('  • Real-time agent validation');
     </script>
 </body>
 </html>

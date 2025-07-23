@@ -1,29 +1,41 @@
 {
-    "name": "@ansregistry/core",
-    "version": "0.1.0",
-    "description": "Universal naming for AI agents - Core resolver",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      }
-    },
-    "scripts": {
-      "build": "tsc",
-      "dev": "tsc --watch",
-      "test": "tsx test/resolve.test.ts",
-      "test:watch": "tsx --watch test/resolve.test.ts"
-    },
-    "dependencies": {},
-    "devDependencies": {
-      "@types/node": "^20.0.0",
-      "typescript": "^5.0.0",
-      "tsx": "^4.0.0"
-    },
-    "files": [
-      "dist/",
-      "README.md"
-    ]
-  }
+  "name": "@ansregistry/core",
+  "version": "0.1.0",
+  "description": "Universal naming for AI agents - Core resolver",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "tsx test/resolve.test.ts",
+    "test:watch": "tsx --watch test/resolve.test.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist data",
+    "admin": "node scripts/serve-admin.js",
+    "admin:dev": "npm run build && npm run admin"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "files": [
+    "dist/",
+    "scripts/",
+    "admin-ui/",
+    "README.md"
+  ]
+}
