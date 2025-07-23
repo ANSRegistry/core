@@ -167,6 +167,35 @@
             margin-top: 2rem;
         }
         
+        .agent-section {
+            margin-bottom: 3rem;
+        }
+        
+        .agent-section h4 {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .agent-section.public h4 {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .agent-section.internal h4 {
+            background: #f3e8ff;
+            color: #7c2d12;
+            border-left: 4px solid #a855f7;
+        }
+        
+        .agent-section.private h4 {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+        
         .agent-item {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
@@ -178,16 +207,41 @@
             align-items: center;
         }
         
-        .agent-item .agent-info h4 {
+        .agent-item .agent-info h5 {
             margin: 0 0 0.25rem 0;
             color: #1f2937;
             font-family: 'Monaco', monospace;
+            font-size: 0.95rem;
         }
         
         .agent-item .agent-info p {
             margin: 0;
             color: #6b7280;
             font-size: 0.9rem;
+        }
+        
+        .discovery-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .discovery-badge.public {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .discovery-badge.internal {
+            background: #f3e8ff;
+            color: #7c2d12;
+        }
+        
+        .discovery-badge.private {
+            background: #fef3c7;
+            color: #92400e;
         }
         
         .capabilities {
@@ -294,6 +348,58 @@
             border-left-color: #ef4444;
             background: #fef2f2;
         }
+        
+        .discovery-info {
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .discovery-info.public {
+            background: #dbeafe;
+            border-left-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        .discovery-info.internal {
+            background: #f3e8ff;
+            border-left-color: #a855f7;
+            color: #7c2d12;
+        }
+        
+        .discovery-info.private {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
@@ -304,35 +410,65 @@
     
     <div class="container">
         <div class="tabs">
-            <button class="tab active" onclick="showTab('internal')">Internal Agents</button>
-            <button class="tab" onclick="showTab('wellknown')">Well-Known Setup</button>
+            <button class="tab active" onclick="showTab('agents')">Agents</button>
+            <button class="tab" onclick="showTab('wellknown')">Well-Known Generation</button>
             <button class="tab" onclick="showTab('registry')">Registry Connection</button>
             <button class="tab" onclick="showTab('testing')">Testing</button>
         </div>
         
-        <!-- Internal Agents Tab -->
-        <div id="internal" class="tab-content active">
-            <h2>🏢 Internal Agents Configuration</h2>
+        <!-- Agents Tab -->
+        <div id="agents" class="tab-content active">
+            <h2>🤖 Agent Management</h2>
             <div class="alert alert-info">
-                <strong>Internal Agents</strong> are private agents within your organization (e.g., <code>agent://hr.internal.company.local</code>)
+                <strong>Agent Registry:</strong> Configure your agents and choose their discovery level. Public agents will be included in .well-known discovery, internal agents are for your organization only, and private agents require manual configuration.
+            </div>
+            
+            <!-- Agent Statistics -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number" id="publicCount">0</div>
+                    <div class="stat-label">🌐 Public</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="internalCount">0</div>
+                    <div class="stat-label">🏢 Internal</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="privateCount">0</div>
+                    <div class="stat-label">🔒 Private</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">📊 Total</div>
+                </div>
             </div>
             
             <form id="addAgentForm">
                 <div class="grid">
                     <div class="form-group">
                         <label for="agentUri">Agent URI</label>
-                        <input type="text" id="agentUri" placeholder="agent://hr.internal.company.local" required>
-                        <small>Format: agent://[name].[service].internal.[domain]</small>
+                        <input type="text" id="agentUri" placeholder="agent://support.company.com" required>
+                        <small>Format: agent://[name].[service].[domain]</small>
                     </div>
                     
                     <div class="form-group">
                         <label for="endpoint">Endpoint URL</label>
-                        <input type="url" id="endpoint" placeholder="https://hr-system.company.local/agent" required>
+                        <input type="url" id="endpoint" placeholder="https://api.company.com/agents/support" required>
                         <small>The actual HTTP endpoint for this agent</small>
                     </div>
                 </div>
                 
                 <div class="grid">
+                    <div class="form-group">
+                        <label for="discoveryLevel">🔍 Discovery Level</label>
+                        <select id="discoveryLevel" required>
+                            <option value="public">🌐 Public - Discoverable via .well-known (anyone can find)</option>
+                            <option value="internal">🏢 Internal - Your organization only</option>
+                            <option value="private">🔒 Private - No automatic discovery (manual config only)</option>
+                        </select>
+                        <small id="discoveryHelp">How should other systems discover this agent?</small>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select id="status">
@@ -341,61 +477,67 @@
                             <option value="suspended">Suspended</option>
                         </select>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="capabilities">Capabilities</label>
-                        <input type="text" id="capabilities" placeholder="hr, benefits, payroll">
-                        <small>Comma-separated list of what this agent can do</small>
-                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="capabilities">Capabilities</label>
+                    <input type="text" id="capabilities" placeholder="support, billing, api">
+                    <small>Comma-separated list of what this agent can do</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" rows="3" placeholder="Internal HR agent for employee services"></textarea>
+                    <textarea id="description" rows="3" placeholder="Customer support agent for billing inquiries"></textarea>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">➕ Add Internal Agent</button>
-                <button type="button" class="btn btn-secondary" onclick="generateConfig()">📋 Generate Config</button>
+                <!-- Discovery Level Info -->
+                <div id="discoveryInfo" class="discovery-info">
+                    <div id="publicInfo">
+                        <strong>🌐 Public Discovery:</strong><br>
+                        • Agent will be included in .well-known/agent.json<br>
+                        • Anyone on the internet can discover this agent<br>
+                        • Good for: customer support, public APIs, developer tools
+                    </div>
+                    
+                    <div id="internalInfo">
+                        <strong>🏢 Internal Discovery:</strong><br>
+                        • Agent discoverable only within your organization<br>
+                        • Not included in public .well-known file<br>
+                        • Good for: HR, finance, internal tools, employee services
+                    </div>
+                    
+                    <div id="privateInfo">
+                        <strong>🔒 Private:</strong><br>
+                        • No automatic discovery - completely private<br>
+                        • Must be configured manually by teams that need it<br>
+                        • Good for: sensitive systems, admin tools, testing agents
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">➕ Add Agent</button>
                 <button type="button" class="btn btn-secondary" onclick="clearForm()">🗑️ Clear Form</button>
             </form>
             
             <div class="agent-list">
-                <h3>Configured Internal Agents</h3>
+                <h3>Configured Agents</h3>
                 <div id="agentsList">
                     <!-- Agents will be populated here -->
                 </div>
             </div>
         </div>
         
-        <!-- Well-Known Setup Tab -->
+        <!-- Well-Known Generation Tab -->
         <div id="wellknown" class="tab-content">
-            <h2>🌐 Well-Known Discovery Setup</h2>
+            <h2>🌐 Well-Known Generation</h2>
             <div class="alert alert-info">
-                <strong>Well-Known Discovery</strong> allows public agents to be discovered via <code>https://yourdomain.com/.well-known/agent.json</code>
+                <strong>Well-Known Discovery</strong> automatically generates <code>.well-known/agent.json</code> from your public agents.
             </div>
             
             <form id="wellKnownForm">
                 <div class="form-group">
                     <label for="domain">Your Domain</label>
-                    <input type="text" id="domain" placeholder="stripe.com" required>
+                    <input type="text" id="domain" placeholder="company.com" required>
                     <small>The domain where your .well-known file will be hosted</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="publicAgentUri">Public Agent URI</label>
-                    <input type="text" id="publicAgentUri" placeholder="agent://support.stripe.com" required>
-                </div>
-                
-                <div class="grid">
-                    <div class="form-group">
-                        <label for="publicEndpoint">Public Endpoint</label>
-                        <input type="url" id="publicEndpoint" placeholder="https://api.stripe.com/agents/support" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="publicCapabilities">Capabilities</label>
-                        <input type="text" id="publicCapabilities" placeholder="support, billing, payments">
-                    </div>
                 </div>
                 
                 <button type="button" class="btn btn-primary" onclick="generateWellKnown()">🔧 Generate .well-known/agent.json</button>
@@ -481,7 +623,7 @@
                 <h3>Test Agent Resolution</h3>
                 <div class="form-group">
                     <label for="testUri">Agent URI to Test</label>
-                    <input type="text" id="testUri" placeholder="agent://hr.internal.company.local">
+                    <input type="text" id="testUri" placeholder="agent://support.company.com">
                 </div>
                 
                 <button class="btn btn-primary" onclick="testAgentResolution()">🚀 Test Resolution</button>
@@ -500,7 +642,6 @@
                     <button class="btn btn-secondary" onclick="setTestUri('agent://hello.dev.pbolduc')">Demo Hello</button>
                     <button class="btn btn-secondary" onclick="setTestUri('agent://support.demo.ansregistry')">Demo Support</button>
                     <button class="btn btn-secondary" onclick="setTestUri('agent://test.local')">Test Local</button>
-                    <button class="btn btn-secondary" onclick="setTestUri('agent://hr.internal.company.local')">Internal HR</button>
                 </div>
             </div>
         </div>
@@ -528,7 +669,7 @@
         };
         
         // State management
-        let internalAgents = JSON.parse(localStorage.getItem('ans-internal-agents') || '{}');
+        let agents = JSON.parse(localStorage.getItem('ans-agents') || '{}');
         
         // Tab functionality
         window.showTab = function(tabName) {
@@ -543,15 +684,45 @@
             event.target.classList.add('active');
         };
         
-        // Internal Agents functionality
-        document.getElementById('addAgentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            addInternalAgent();
+        // Discovery level info display
+        document.getElementById('discoveryLevel').addEventListener('change', function() {
+            const level = this.value;
+            const infoDiv = document.getElementById('discoveryInfo');
+            const infoDivs = ['publicInfo', 'internalInfo', 'privateInfo'];
+            
+            // Hide all info divs
+            infoDivs.forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            
+            // Show and style the appropriate info
+            infoDiv.className = `discovery-info ${level}`;
+            infoDiv.style.display = 'block';
+            document.getElementById(`${level}Info`).style.display = 'block';
+            
+            // Update help text
+            const helpText = {
+                'public': 'This agent will be publicly discoverable via .well-known/agent.json',
+                'internal': 'This agent will only be discoverable within your organization',
+                'private': 'This agent will require manual configuration - no automatic discovery'
+            };
+            
+            document.getElementById('discoveryHelp').textContent = helpText[level] || '';
         });
         
-        function addInternalAgent() {
+        // Trigger initial display
+        document.getElementById('discoveryLevel').dispatchEvent(new Event('change'));
+        
+        // Agent management functionality
+        document.getElementById('addAgentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addAgent();
+        });
+        
+        function addAgent() {
             const uri = document.getElementById('agentUri').value;
             const endpoint = document.getElementById('endpoint').value;
+            const discoveryLevel = document.getElementById('discoveryLevel').value;
             const status = document.getElementById('status').value;
             const capabilities = document.getElementById('capabilities').value
                 .split(',').map(c => c.trim()).filter(c => c);
@@ -565,6 +736,7 @@
             const agentConfig = {
                 agent_uri: uri,
                 endpoint: endpoint,
+                discovery_level: discoveryLevel,
                 status: status,
                 capabilities: capabilities,
                 metadata: {
@@ -574,34 +746,88 @@
             };
             
             // Save to state
-            internalAgents[uri] = agentConfig;
-            localStorage.setItem('ans-internal-agents', JSON.stringify(internalAgents));
+            agents[uri] = agentConfig;
+            localStorage.setItem('ans-agents', JSON.stringify(agents));
             
-            // Register with ANS Registry
+            // Register with ANS Registry (for resolution)
             registerInternalAgent(uri, agentConfig);
             
             // Update UI
             renderAgentsList();
+            updateStats();
             clearForm();
             
             showAlert('success', `✅ Agent ${uri} added successfully!`);
         }
         
+        function updateStats() {
+            const publicAgents = Object.values(agents).filter(a => a.discovery_level === 'public');
+            const internalAgents = Object.values(agents).filter(a => a.discovery_level === 'internal');
+            const privateAgents = Object.values(agents).filter(a => a.discovery_level === 'private');
+            
+            document.getElementById('publicCount').textContent = publicAgents.length;
+            document.getElementById('internalCount').textContent = internalAgents.length;
+            document.getElementById('privateCount').textContent = privateAgents.length;
+            document.getElementById('totalCount').textContent = Object.keys(agents).length;
+        }
+        
         window.clearForm = function() {
             document.getElementById('addAgentForm').reset();
+            document.getElementById('discoveryLevel').dispatchEvent(new Event('change'));
         };
         
         function renderAgentsList() {
             const container = document.getElementById('agentsList');
-            if (Object.keys(internalAgents).length === 0) {
+            if (Object.keys(agents).length === 0) {
                 container.innerHTML = '<p style="color: #6b7280; text-align: center; margin: 2rem 0;">No agents configured yet. Add your first agent above!</p>';
                 return;
             }
             
-            container.innerHTML = Object.entries(internalAgents).map(([uri, agent]) => `
+            // Group agents by discovery level
+            const publicAgents = Object.entries(agents).filter(([uri, agent]) => agent.discovery_level === 'public');
+            const internalAgents = Object.entries(agents).filter(([uri, agent]) => agent.discovery_level === 'internal');
+            const privateAgents = Object.entries(agents).filter(([uri, agent]) => agent.discovery_level === 'private');
+            
+            let html = '';
+            
+            // Public agents section
+            if (publicAgents.length > 0) {
+                html += `
+                    <div class="agent-section public">
+                        <h4>🌐 Public Agents (${publicAgents.length}) - Included in .well-known</h4>
+                        ${renderAgentItems(publicAgents)}
+                    </div>
+                `;
+            }
+            
+            // Internal agents section
+            if (internalAgents.length > 0) {
+                html += `
+                    <div class="agent-section internal">
+                        <h4>🏢 Internal Agents (${internalAgents.length}) - Organization only</h4>
+                        ${renderAgentItems(internalAgents)}
+                    </div>
+                `;
+            }
+            
+            // Private agents section
+            if (privateAgents.length > 0) {
+                html += `
+                    <div class="agent-section private">
+                        <h4>🔒 Private Agents (${privateAgents.length}) - Manual configuration only</h4>
+                        ${renderAgentItems(privateAgents)}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function renderAgentItems(agentEntries) {
+            return agentEntries.map(([uri, agent]) => `
                 <div class="agent-item">
                     <div class="agent-info">
-                        <h4>${uri}</h4>
+                        <h5>${uri} <span class="discovery-badge ${agent.discovery_level}">${agent.discovery_level}</span></h5>
                         <p><span class="status-indicator status-${agent.status}"></span>${agent.endpoint}</p>
                         <div class="capabilities">
                             ${agent.capabilities.map(cap => `<span class="capability">${cap}</span>`).join('')}
@@ -616,71 +842,65 @@
         }
         
         window.editAgent = function(uri) {
-            const agent = internalAgents[uri];
+            const agent = agents[uri];
             document.getElementById('agentUri').value = agent.agent_uri;
             document.getElementById('endpoint').value = agent.endpoint;
+            document.getElementById('discoveryLevel').value = agent.discovery_level;
             document.getElementById('status').value = agent.status;
             document.getElementById('capabilities').value = agent.capabilities.join(', ');
             document.getElementById('description').value = agent.metadata?.description || '';
+            
+            // Trigger discovery level change
+            document.getElementById('discoveryLevel').dispatchEvent(new Event('change'));
         };
         
         window.deleteAgent = function(uri) {
             if (confirm(`Delete agent ${uri}?`)) {
-                delete internalAgents[uri];
-                localStorage.setItem('ans-internal-agents', JSON.stringify(internalAgents));
+                delete agents[uri];
+                localStorage.setItem('ans-agents', JSON.stringify(agents));
                 renderAgentsList();
+                updateStats();
                 showAlert('success', `✅ Agent ${uri} deleted`);
             }
         };
         
-        window.generateConfig = function() {
-            const config = {
-                useInternalAgents: true,
-                internalRegistry: internalAgents
-            };
-            
-            const configText = `// ANS Registry Configuration
-import { configureInternalAgents } from '@ansregistry/core';
-
-configureInternalAgents(${JSON.stringify(config, null, 2)});`;
-            
-            navigator.clipboard.writeText(configText).then(() => {
-                showAlert('success', '📋 Configuration copied to clipboard!');
-            });
-        };
-        
-        // Well-Known functionality
+        // Well-Known functionality - AUTO-GENERATED from public agents
         window.generateWellKnown = function() {
             const domain = document.getElementById('domain').value;
-            const agentUri = document.getElementById('publicAgentUri').value;
-            const endpoint = document.getElementById('publicEndpoint').value;
-            const capabilities = document.getElementById('publicCapabilities').value
-                .split(',').map(c => c.trim()).filter(c => c);
             
-            if (!domain || !agentUri || !endpoint) {
-                showAlert('error', '❌ Please fill in all required fields');
+            if (!domain) {
+                showAlert('error', '❌ Please enter your domain first');
                 return;
             }
             
-            if (!validateAgentURI(agentUri)) {
-                showAlert('error', '❌ Invalid agent URI format');
+            // Filter only public agents
+            const publicAgents = Object.values(agents).filter(agent => agent.discovery_level === 'public');
+            
+            if (publicAgents.length === 0) {
+                showAlert('error', '❌ No public agents configured. Add public agents first.');
                 return;
             }
             
             const wellKnown = {
                 owner: domain,
-                agents: [{
-                    agent_uri: agentUri,
-                    endpoint: endpoint,
-                    capabilities: capabilities,
-                    version: "1.0.0",
-                    type: "persistent",
-                    created: new Date().toISOString(),
+                agents: publicAgents.map(agent => ({
+                    agent_uri: agent.agent_uri,
+                    endpoint: agent.endpoint,
+                    capabilities: agent.capabilities,
+                    status: agent.status,
+                    public: true,
                     metadata: {
-                        description: "Generated via ANS Registry Admin",
+                        description: agent.metadata?.description || "Generated via ANS Registry Admin",
                         contact: `support@${domain}`
                     }
-                }],
+                })),
+                discovery_info: {
+                    total_agents: Object.keys(agents).length,
+                    public_agents: publicAgents.length,
+                    internal_agents: Object.values(agents).filter(a => a.discovery_level === 'internal').length,
+                    private_agents: Object.values(agents).filter(a => a.discovery_level === 'private').length,
+                    contact: `admin@${domain}`
+                },
                 metadata: {
                     published_by: domain,
                     format_version: "0.1.0",
@@ -693,6 +913,8 @@ configureInternalAgents(${JSON.stringify(config, null, 2)});`;
             
             // Store for download
             window.currentWellKnown = wellKnown;
+            
+            showAlert('success', `✅ Generated .well-known with ${publicAgents.length} public agents!`);
         };
         
         window.validateWellKnown = function() {
@@ -702,7 +924,16 @@ configureInternalAgents(${JSON.stringify(config, null, 2)});`;
                 return;
             }
             
-            const url = `https://${domain}/.well-known/agent.json`;
+            // Build the correct URL - handle both HTTP and HTTPS domains
+            let url;
+            if (domain.startsWith('http://') || domain.startsWith('https://')) {
+                // Remove trailing slash if present, then add the path
+                const cleanDomain = domain.endsWith('/') ? domain.slice(0, -1) : domain;
+                url = `${cleanDomain}/.well-known/agent.json`;
+            } else {
+                url = `https://${domain}/.well-known/agent.json`;
+            }
+            
             window.open(url, '_blank');
         };
         
@@ -743,7 +974,7 @@ configureInternalAgents(${JSON.stringify(config, null, 2)});`;
         };
         
         window.syncAgents = function() {
-            const agentCount = Object.keys(internalAgents).length;
+            const agentCount = Object.keys(agents).length;
             setTimeout(() => {
                 showAlert('success', `🔄 Successfully synced ${agentCount} agents with ANS Registry!`);
             }, 1500);
@@ -847,17 +1078,18 @@ configureInternalAgents(${JSON.stringify(config, null, 2)});`;
             setTimeout(() => {
                 alert.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => alert.remove(), 300);
-            }, 3000);
+            }, 300);
         }
         
         // Initialize
         renderAgentsList();
+        updateStats();
         
         // Configure ANS Registry with stored agents
-        if (Object.keys(internalAgents).length > 0) {
+        if (Object.keys(agents).length > 0) {
             configureInternalAgents({
                 useInternalAgents: true,
-                internalRegistry: internalAgents
+                internalRegistry: agents
             });
         }
         
